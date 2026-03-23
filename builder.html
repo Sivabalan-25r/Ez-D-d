@@ -38,6 +38,33 @@
         }
     </script>
 <style>
+        /* AI Pulle / Refinement Glow */
+        @keyframes ai-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); border-color: rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 40px 10px rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 1); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); border-color: rgba(16, 185, 129, 0.4); }
+        }
+        .ai-processing {
+            animation: ai-pulse 2s infinite ease-in-out;
+            position: relative;
+            z-index: 50;
+        }
+        .ai-processing::after {
+            content: 'RE-SYNTHESIZING...';
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background: #10b981;
+            color: white;
+            padding: 2px 8px;
+            font-size: 8px;
+            font-weight: 800;
+            border-radius: 2px;
+            letter-spacing: 0.1em;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Material Symbols Fill Fix */
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
         }
@@ -2088,9 +2115,12 @@ document.getElementById('ai-refine-btn').addEventListener('click', async () => {
     const textSpan = btn.querySelector('.refine-text');
     const originalText = textSpan.textContent;
 
+    const elNode = document.getElementById('canvas').children[idx];
+
     try {
         btn.disabled = true;
         textSpan.textContent = 'Refining...';
+        elNode.classList.add('ai-processing'); // Visual feedback ON
         showToast('Summoning AI Refiner...', 'auto_awesome');
 
         const response = await fetch('http://localhost:5000/api/ai/refine-component', {
@@ -2112,7 +2142,7 @@ document.getElementById('ai-refine-btn').addEventListener('click', async () => {
             // Safe Structural Update
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = data.html;
-            el.html = tempDiv.innerHTML; // Normalized
+            el.html = tempDiv.innerHTML;
             
             renderElements();
             showToast('Section Transformed!', 'magic_button');
@@ -2123,8 +2153,47 @@ document.getElementById('ai-refine-btn').addEventListener('click', async () => {
     } finally {
         btn.disabled = false;
         textSpan.textContent = originalText;
+        if(elNode) elNode.classList.remove('ai-processing'); // Visual feedback OFF
     }
 });
+
+async function rewriteWithAI(fieldId) {
+    const input = document.getElementById(fieldId);
+    if (!input || !input.value.trim()) {
+        showToast('Type something first to rewrite!', 'warning');
+        return;
+    }
+
+    const originalText = input.value;
+    const btn = event.currentTarget;
+    const icon = btn.querySelector('span');
+    
+    try {
+        icon.classList.add('animate-spin');
+        showToast('AI is polishing your words...', 'auto_awesome');
+
+        const response = await fetch('http://localhost:5000/api/ai/refine-text', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                text: originalText, 
+                instruction: 'Make it catchy, professional, and high-converting. Keep it concise.' 
+            })
+        });
+
+        if (!response.ok) throw new Error();
+        const data = await response.json();
+        
+        if (data.success && data.text) {
+            input.value = data.text;
+            showToast('Wordsmithing Complete!', 'pen_size');
+        }
+    } catch (err) {
+        showToast('AI was shy. Try again.', 'error');
+    } finally {
+        icon.classList.remove('animate-spin');
+    }
+}
 
 // Update Inspector logic to handle AI Refine section visibility
 const originalUpdateInspector = updateInspector;

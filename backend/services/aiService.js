@@ -117,4 +117,16 @@ async function refineComponent(html, instruction) {
   }
 }
 
-module.exports = { generateComponent, refineComponent };
+async function refineText(text, instruction) {
+  const prompt = `Input Text: "${text}"\nInstruction: ${instruction}\n\nTask: Rewrite the text based on the instruction. Return ONLY the new text string. No quotes, no markdown, no explanation.`;
+  
+  try {
+    const result = await generateWithGemini(prompt);
+    return { text: result.trim(), source: 'gemini' };
+  } catch (err) {
+    const result = await generateWithGroq(prompt);
+    return { text: result.trim(), source: 'groq' };
+  }
+}
+
+module.exports = { generateComponent, refineComponent, refineText };

@@ -64,4 +64,23 @@ router.post('/refine-component', aiGeneratorLimiter, async (req, res) => {
     }
 });
 
+router.post('/refine-text', aiGeneratorLimiter, async (req, res) => {
+    try {
+        const { text, instruction } = req.body;
+
+        if (!text || !instruction) {
+            return res.status(400).json({ error: 'Text and instruction required.' });
+        }
+
+        const { refineText } = require('../services/aiService');
+        const result = await refineText(text, instruction);
+
+        res.json({ success: true, text: result.text, source: result.source });
+
+    } catch (err) {
+        console.error('AI Text Refinement Error:', err);
+        res.status(500).json({ error: 'Text refinement failed.' });
+    }
+});
+
 module.exports = router;
