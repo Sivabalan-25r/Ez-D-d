@@ -1,0 +1,17 @@
+{
+  "name": "ez-dnd-suite",
+  "version": "1.0.0",
+  "description": "Ez D&d: Full-Stack Website Builder",
+  "main": "index.html",
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "node ./node_modules/concurrently/dist/bin/concurrently.js \"node backend/server.js\" \"node ./node_modules/live-server/live-server.js . --port=3000 --open=index.html\"",
+    "backend": "node backend/server.js",
+    "frontend": "node ./node_modules/live-server/live-server.js . --port=3000 --open=index.html",
+    "install-all": "npm install && cd backend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "live-server": "^1.2.2"
+  }
+}

@@ -133,61 +133,139 @@
         .anim-slide-up { animation: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .anim-zoom-in { animation: zoom-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-        /* Responsive Visibility (Simulated in Builder) */
         .device-mobile .hidden-mobile { opacity: 0.2; pointer-events: none; filter: grayscale(1); }
         .device-tablet .hidden-tablet { opacity: 0.2; pointer-events: none; filter: grayscale(1); }
+
+        /* Preview Mode UI Hiding */
+        body.preview-mode header,
+        body.preview-mode aside,
+        body.preview-mode footer,
+        body.preview-mode .el-label,
+        body.preview-mode .el-actions,
+        body.preview-mode .resize-handle { 
+            display: none !important; 
+        }
+        body.preview-mode main { 
+            margin: 0 !important; 
+            padding: 0 !important;
+            height: 100vh !important;
+            width: 100vw !important;
+            background: #ffffff !important;
+        }
+        body.preview-mode #canvas-frame {
+            border: none !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            max-width: 100% !important;
+        }
     </style>
 </head>
 <body class="bg-background font-body text-on-surface overflow-hidden">
 <!-- TopNavBar -->
-<header class="fixed top-0 w-full z-50 bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/50 flex justify-between items-center px-6 h-14">
-<div class="flex items-center gap-10">
-<a href="index.html" class="text-sm font-bold tracking-[0.2em] text-emerald-500 hover:text-emerald-400 transition-colors">Ez D&d Builder</a>
-<!-- Toolbar Extras -->
-<div class="flex items-center gap-1 px-1 h-8 bg-slate-900 rounded-md border border-slate-800">
-<button id="undo-btn" class="p-1.5 text-slate-500 hover:text-emerald-400 transition-colors" title="Undo (Ctrl+Z)">
-<span class="material-symbols-outlined !text-[18px]">undo</span>
-</button>
-<button id="redo-btn" class="p-1.5 text-slate-500 hover:text-emerald-400 transition-colors" title="Redo (Ctrl+Y)">
-<span class="material-symbols-outlined !text-[18px]">redo</span>
-</button>
-<div class="w-[1px] h-4 bg-slate-800 mx-1"></div>
-<button id="device-desktop" class="p-1.5 text-emerald-500 bg-slate-800 rounded-sm device-btn" title="Desktop View">
-<span class="material-symbols-outlined !text-[18px]">desktop_windows</span>
-</button>
-<button id="device-tablet" class="p-1.5 text-slate-500 hover:text-emerald-400 transition-colors device-btn" title="Tablet View">
-<span class="material-symbols-outlined !text-[18px]">tablet_mac</span>
-</button>
-<button id="device-mobile" class="p-1.5 text-slate-500 hover:text-emerald-400 transition-colors device-btn" title="Mobile View">
-<span class="material-symbols-outlined !text-[18px]">smartphone</span>
-</button>
-</div>
-</div>
-<nav class="flex items-center gap-6">
-<div class="hidden md:flex gap-8 font-inter tracking-tight text-[11px] uppercase font-semibold">
-<a class="text-slate-500 hover:text-slate-100 transition-colors" href="index.html">Home</a>
-<a class="text-slate-500 hover:text-slate-100 transition-colors" href="success.html" id="publish-btn">Editor</a>
-</div>
-<div class="flex items-center gap-3 ml-4">
-<a href="dashboard.html" class="w-7 h-7 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors">
-<span class="material-symbols-outlined !text-[16px]">person</span>
-</a>
-</div>
-</nav>
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-slate-950/90 backdrop-blur-xl border-b border-white/5 flex justify-between items-center px-4 h-14">
+    <!-- Left Section: Logo + History -->
+    <div class="flex items-center gap-6">
+        <a href="index.html" class="flex items-center gap-2 group">
+            <div class="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:bg-emerald-400 transition-colors">
+                <span class="material-symbols-outlined text-background !text-[20px]">architecture</span>
+            </div>
+            <span class="text-sm font-bold tracking-[0.15em] text-slate-100 hidden sm:block">Ez D&d</span>
+        </a>
+        
+        <!-- Undo/Redo Group -->
+        <div class="flex items-center bg-slate-900 rounded-md border border-slate-800 p-0.5 ml-2">
+            <button id="undo-btn" class="p-1.5 text-slate-500 hover:text-slate-100 hover:bg-slate-800 rounded-sm transition-all" title="Undo (Ctrl+Z)">
+                <span class="material-symbols-outlined !text-[18px]">undo</span>
+            </button>
+            <button id="redo-btn" class="p-1.5 text-slate-500 hover:text-slate-100 hover:bg-slate-800 rounded-sm transition-all" title="Redo (Ctrl+Y)">
+                <span class="material-symbols-outlined !text-[18px]">redo</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Center Section: Device Toggle + Project Name -->
+    <div class="flex items-center gap-8">
+        <!-- Device Toggles -->
+        <div class="flex items-center bg-slate-900 rounded-md border border-slate-800 p-0.5">
+            <button id="device-desktop" class="p-1.5 text-emerald-500 bg-slate-800 rounded-sm device-btn" title="Desktop View">
+                <span class="material-symbols-outlined !text-[18px]">desktop_windows</span>
+            </button>
+            <button id="device-tablet" class="p-1.5 text-slate-500 hover:text-emerald-400 hover:bg-slate-800 rounded-sm transition-all device-btn" title="Tablet View">
+                <span class="material-symbols-outlined !text-[18px]">tablet_mac</span>
+            </button>
+            <button id="device-mobile" class="p-1.5 text-slate-500 hover:text-emerald-400 hover:bg-slate-800 rounded-sm transition-all device-btn" title="Mobile View">
+                <span class="material-symbols-outlined !text-[18px]">smartphone</span>
+            </button>
+        </div>
+
+        <div class="hidden lg:flex items-center gap-2 h-8 px-3 bg-slate-900/50 rounded-md border border-slate-800/30 group">
+            <input type="text" id="project-name-top" value="My Website" class="bg-transparent text-xs font-bold text-slate-400 focus:text-slate-100 outline-none w-32 tracking-tight transition-colors">
+            <span class="material-symbols-outlined !text-[14px] text-slate-700 group-hover:text-slate-500">edit</span>
+        </div>
+    </div>
+
+    <!-- Right Section: Actions -->
+    <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 pr-3 border-r border-slate-800/60 mr-1">
+            <button id="save-btn" class="p-2 text-slate-400 hover:text-slate-100 transition-colors" title="Save Project">
+                <span class="material-symbols-outlined !text-[20px]">save</span>
+            </button>
+            <button id="preview-btn" class="p-2 text-slate-400 hover:text-slate-100 transition-colors" title="Preview Mode">
+                <span class="material-symbols-outlined !text-[20px]">visibility</span>
+            </button>
+            <button id="export-btn" class="p-2 text-slate-400 hover:text-slate-100 transition-colors" title="Export Code">
+                <span class="material-symbols-outlined !text-[20px]">file_download</span>
+            </button>
+        </div>
+
+        <button id="publish-btn-toolbar" class="h-9 px-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-[11px] uppercase tracking-wider font-bold flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-emerald-500/10 gap-2">
+            <span>Publish</span>
+            <span class="material-symbols-outlined !text-[16px]">rocket_launch</span>
+        </button>
+
+        <a href="dashboard.html" class="w-9 h-9 ml-2 bg-slate-900 text-primary rounded-full flex items-center justify-center border border-slate-800 hover:border-primary/30 transition-all active:scale-90" id="profile-btn-top">
+            <span class="material-symbols-outlined !text-[20px]">person</span>
+        </a>
+    </div>
 </header>
 <div class="flex h-screen pt-14" id="builder-layout">
 <!-- SideNavBar (Left Components Panel) -->
 <!-- SideNavBar (Left Components Panel) -->
-<aside class="fixed left-0 top-14 h-[calc(100vh-56px)] w-60 z-40 bg-slate-950 border-r border-slate-800/60 flex flex-col" id="left-panel">
+<aside class="fixed left-0 top-14 h-[calc(100vh-84px)] w-60 z-40 bg-slate-950 border-r border-slate-800/60 flex flex-col" id="left-panel">
 <div class="p-4 border-b border-slate-800/40">
-<h2 class="text-[10px] uppercase tracking-[0.25em] text-slate-500 font-bold mb-1">Component Library</h2>
-<p class="text-[10px] text-slate-600 font-medium">Click to add to canvas</p>
-<div class="relative mt-3">
+<div class="flex items-center justify-between mb-4">
+    <div>
+        <h2 class="text-[10px] uppercase tracking-[0.25em] text-slate-500 font-bold mb-1">Library</h2>
+        <p class="text-[10px] text-slate-600 font-medium tracking-tight">Add elements or templates</p>
+    </div>
+    <button onclick="openModal('templates-modal')" class="p-1 px-2.5 bg-slate-900 hover:bg-slate-800 text-[9px] font-bold text-emerald-500 rounded border border-slate-800 transition-all flex items-center gap-1.5 active:scale-95">
+        <span class="material-symbols-outlined !text-[12px]">dashboard_customize</span>
+        <span>TEMPLATES</span>
+    </button>
+</div>
+
+<!-- AI Integration Tab -->
+<div class="px-4 mb-4">
+    <div class="bg-gradient-to-br from-emerald-500/10 to-blue-500/10 border border-emerald-500/20 rounded-lg p-3 space-y-3">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-emerald-400 !text-[16px] animate-pulse">auto_awesome</span>
+            <span class="text-[10px] uppercase tracking-[0.2em] text-slate-300 font-bold">AI Oracle</span>
+        </div>
+        <textarea id="ai-prompt" placeholder="Ask AI to build a 'pricing table' or 'modern nav'..." class="w-full h-16 bg-slate-950/50 border border-slate-800 rounded p-2 text-[10px] text-slate-300 focus:border-emerald-500/50 focus:outline-none resize-none placeholder:text-slate-700"></textarea>
+        <button id="ai-gen-btn" class="w-full h-7 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 overflow-hidden group">
+            <span class="gen-text">Generate Magic</span>
+            <span class="material-symbols-outlined !text-[14px] group-hover:rotate-45 transition-transform">bolt</span>
+        </button>
+    </div>
+</div>
+
+<div class="relative mt-3 px-4">
 <input type="text" placeholder="Search components..." id="comp-search" class="w-full h-7 pl-7 pr-2 bg-slate-900 border border-slate-800 rounded-sm text-[10px] text-slate-300 focus:border-emerald-500/50 focus:outline-none placeholder:text-slate-600">
-<span class="material-symbols-outlined absolute left-1.5 top-1 text-slate-600 !text-[16px]">search</span>
+<span class="material-symbols-outlined absolute left-5.5 top-1 text-slate-600 !text-[16px]">search</span>
 </div>
 </div>
-<div class="flex-1 overflow-y-auto p-3 space-y-1" id="comp-panel">
+<div class="flex-1 overflow-y-auto p-3 pb-8 space-y-1" id="comp-panel">
 <!-- LAYOUT -->
 <div class="comp-group" data-group="layout">
 <div class="comp-header flex items-center justify-between p-2 rounded-sm cursor-pointer hover:bg-slate-900 transition-colors" data-toggle="layout">
@@ -258,11 +336,10 @@
 </div>
 </div>
 </div>
-<div class="p-3 bg-slate-950 border-t border-slate-800/60 space-y-2">
-<button id="construct-btn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-sm text-[10px] uppercase tracking-[0.2em] font-bold transition-colors flex items-center justify-center gap-2 active:scale-95">
+<div class="p-3 pb-6 bg-slate-950 border-t border-slate-800/60 space-y-2">
+<button id="construct-btn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-sm text-[10px] uppercase tracking-[0.2em] font-bold transition-colors flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-emerald-500/10">
 <span class="material-symbols-outlined !text-[16px]">add</span><span>Construct</span>
 </button>
-
 </div>
 </aside>
 <!-- Main Canvas -->
@@ -294,7 +371,7 @@
 </section>
 </main>
 <!-- SideNavBar (Right Properties Panel) -->
-<aside class="fixed right-0 top-14 h-[calc(100vh-56px)] w-72 z-40 bg-slate-950 border-l border-slate-800/60 flex flex-col" id="right-panel">
+<aside class="fixed right-0 top-14 h-[calc(100vh-84px)] w-72 z-40 bg-slate-950 border-l border-slate-800/60 flex flex-col" id="right-panel">
 <div class="p-5 border-b border-slate-800/40 flex justify-between items-end">
 <div>
 <h2 class="text-[10px] uppercase tracking-[0.25em] text-slate-100 font-bold">Inspector</h2>
@@ -311,7 +388,7 @@
         </div>
 
         <!-- Design Tab -->
-        <div class="flex-1 overflow-y-auto p-5 space-y-8 inspector-content" id="tab-design">
+        <div class="flex-1 overflow-y-auto p-5 pb-16 space-y-8 inspector-content" id="tab-design">
             <!-- Typography -->
             <section>
                 <div class="flex items-center justify-between mb-4 cursor-pointer" id="typo-toggle">
@@ -409,7 +486,7 @@
         </div>
 
         <!-- Layout Tab -->
-        <div class="flex-1 overflow-y-auto p-5 space-y-8 inspector-content hidden" id="tab-layout">
+        <div class="flex-1 overflow-y-auto p-5 pb-16 space-y-8 inspector-content hidden" id="tab-layout">
             <section>
                 <div class="flex items-center justify-between mb-4 cursor-pointer">
                     <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Flexbox</span>
@@ -448,7 +525,7 @@
         </div>
 
         <!-- Content Tab -->
-        <div class="flex-1 overflow-y-auto p-6 space-y-6 inspector-content hidden" id="tab-content">
+        <div class="flex-1 overflow-y-auto p-6 pb-16 space-y-6 inspector-content hidden" id="tab-content">
             <div id="content-fields-container" class="space-y-6">
                 <!-- Dynamic Fields Based on Selection -->
                 <div class="space-y-2">
@@ -472,7 +549,7 @@
         </div>
 
         <!-- Extra Tab (Advanced) -->
-        <div class="flex-1 overflow-y-auto p-5 space-y-8 inspector-content hidden" id="tab-extra">
+        <div class="flex-1 overflow-y-auto p-5 pb-16 space-y-8 inspector-content hidden" id="tab-extra">
             <section>
                 <div class="flex items-center justify-between mb-4 cursor-pointer">
                     <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Animations</span>
@@ -516,7 +593,6 @@
 <span class="text-[9px] font-mono text-slate-700 uppercase">Build 10.4.0</span>
 <div class="flex gap-4">
 <a class="text-[9px] uppercase tracking-widest text-slate-500 hover:text-emerald-400 transition-colors font-bold" href="#" id="docs-link">Docs</a>
-<a class="text-[9px] uppercase tracking-widest text-slate-500 hover:text-emerald-400 transition-colors font-bold" href="#" id="support-link">Support</a>
 </div>
 </div>
 </footer>
@@ -604,6 +680,147 @@
         </div>
     </div>
 </div>
+
+<!-- Preview Modal -->
+<div class="modal-overlay" id="preview-modal">
+    <div class="fixed inset-0 z-[100] flex flex-col bg-slate-950">
+        <!-- Preview Header -->
+        <div class="h-14 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-6 shrink-0">
+            <div class="flex items-center gap-4">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Preview Live</span>
+                <div class="h-4 w-[1px] bg-slate-800"></div>
+                <div class="flex items-center gap-1 bg-slate-950 rounded p-0.5 border border-slate-800">
+                    <button class="p-1 px-2 text-[10px] font-bold text-emerald-400 bg-slate-800 rounded-sm preview-device-btn" data-width="100%">Desktop</button>
+                    <button class="p-1 px-2 text-[10px] font-bold text-slate-500 hover:text-emerald-400 rounded-sm preview-device-btn" data-width="768px">Tablet</button>
+                    <button class="p-1 px-2 text-[10px] font-bold text-slate-500 hover:text-emerald-400 rounded-sm preview-device-btn" data-width="375px">Mobile</button>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button id="preview-new-tab" class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:bg-slate-800 rounded-sm transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined !text-[14px]">open_in_new</span>
+                    <span>New Tab</span>
+                </button>
+                <button id="close-preview-btn" class="px-4 py-1.5 bg-slate-800 hover:bg-red-500 text-white rounded-sm text-[10px] uppercase tracking-widest font-bold transition-all">Close</button>
+            </div>
+        </div>
+        
+        <!-- Preview Frame -->
+        <div class="flex-1 overflow-auto bg-slate-950/20 p-8 flex justify-center">
+            <iframe id="preview-iframe" class="bg-white shadow-2xl transition-all duration-300 rounded-sm border border-slate-800" style="width: 100%; height: 100%;"></iframe>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-overlay" id="export-modal">
+    <div class="modal-box max-w-lg p-0 overflow-hidden">
+        <div class="p-6 border-b border-slate-800/60 flex items-center justify-between bg-slate-900/40">
+            <div>
+                <h2 class="text-lg font-bold text-slate-100">Export Project</h2>
+                <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">Ready for production</p>
+            </div>
+            <button onclick="closeModal('export-modal')" class="material-symbols-outlined text-slate-600 hover:text-slate-300 transition-colors">close</button>
+        </div>
+        <div class="p-8">
+            <div class="grid grid-cols-2 gap-6">
+                <!-- ZIP Export -->
+                <div class="group p-6 bg-slate-900/50 rounded-xl border border-slate-800 hover:bg-slate-900 hover:border-emerald-500/30 transition-all cursor-pointer text-center" id="export-zip-btn">
+                    <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined !text-[24px]">folder_zip</span>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-100 mb-1">Developer ZIP</h3>
+                    <p class="text-[10px] text-slate-500 leading-relaxed">Download HTML, CSS, and JS in a bundled package.</p>
+                </div>
+                <!-- Copy HTML -->
+                <div class="group p-6 bg-slate-900/50 rounded-xl border border-slate-800 hover:bg-slate-900 hover:border-emerald-500/30 transition-all cursor-pointer text-center" id="copy-html-btn-modal">
+                    <div class="w-12 h-12 bg-slate-800 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined !text-[24px]">code</span>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-100 mb-1">Copy Markup</h3>
+                    <p class="text-[10px] text-slate-500 leading-relaxed">Copy the full transpiled HTML code to your clipboard.</p>
+                </div>
+            </div>
+            
+            <!-- Code Success indicator (hidden) -->
+            <div id="copy-success-overlay" class="hidden mt-6 animate-in slide-in-from-bottom-2 duration-300">
+                <div class="bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-lg flex items-center gap-3">
+                    <span class="material-symbols-outlined text-emerald-400">check_circle</span>
+                    <span class="text-[11px] text-emerald-400 font-bold uppercase tracking-widest">Code copied to clipboard!</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Templates Modal -->
+<div class="modal-overlay" id="templates-modal">
+    <div class="modal-box max-w-4xl p-0 overflow-hidden bg-slate-950">
+        <div class="p-8 border-b border-slate-800/40 flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent">Start with a Template</h2>
+                <p class="text-xs text-slate-500 mt-2">Pick a foundation for your next project and customize it instantly.</p>
+            </div>
+            <button onclick="closeModal('templates-modal')" class="w-10 h-10 flex items-center justify-center bg-slate-900 rounded-full text-slate-500 hover:bg-slate-800 hover:text-white transition-all">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <div class="p-8 grid grid-cols-2 lg:grid-cols-4 gap-6 overflow-y-auto max-h-[60vh]">
+            <!-- Portfolio -->
+            <div class="template-card group bg-slate-900/50 rounded-xl overflow-hidden border border-slate-800 hover:border-emerald-500/40 transition-all cursor-pointer" onclick="applyTemplate('portfolio')">
+                <div class="h-32 bg-slate-800 relative overflow-hidden flex items-center justify-center">
+                    <span class="material-symbols-outlined text-slate-700 !text-[48px]">person</span>
+                    <div class="absolute inset-0 bg-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-xs font-bold text-slate-100 uppercase tracking-widest">Portfolio</h3>
+                    <p class="text-[10px] text-slate-600 mt-1">Clean & Minimal</p>
+                </div>
+            </div>
+            <!-- Landing Page -->
+            <div class="template-card group bg-slate-900/50 rounded-xl overflow-hidden border border-slate-800 hover:border-emerald-500/40 transition-all cursor-pointer" onclick="applyTemplate('landing')">
+                <div class="h-32 bg-slate-800 relative overflow-hidden flex items-center justify-center">
+                    <span class="material-symbols-outlined text-slate-700 !text-[48px]">rocket</span>
+                    <div class="absolute inset-0 bg-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-xs font-bold text-slate-100 uppercase tracking-widest">Landing Page</h3>
+                    <p class="text-[10px] text-slate-600 mt-1">Conversion focused</p>
+                </div>
+            </div>
+            <!-- Business -->
+            <div class="template-card group bg-slate-900/50 rounded-xl overflow-hidden border border-slate-800 hover:border-emerald-500/40 transition-all cursor-pointer" onclick="applyTemplate('business')">
+                <div class="h-32 bg-slate-800 relative overflow-hidden flex items-center justify-center">
+                    <span class="material-symbols-outlined text-slate-700 !text-[48px]">business</span>
+                    <div class="absolute inset-0 bg-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-xs font-bold text-slate-100 uppercase tracking-widest">Business</h3>
+                    <p class="text-[10px] text-slate-600 mt-1">Modern Enterprise</p>
+                </div>
+            </div>
+            <!-- Blog -->
+            <div class="template-card group bg-slate-900/50 rounded-xl overflow-hidden border border-slate-800 hover:border-emerald-500/40 transition-all cursor-pointer" onclick="applyTemplate('blog')">
+                <div class="h-32 bg-slate-800 relative overflow-hidden flex items-center justify-center">
+                    <span class="material-symbols-outlined text-slate-700 !text-[48px]">article</span>
+                    <div class="absolute inset-0 bg-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-xs font-bold text-slate-100 uppercase tracking-widest">Blog Layout</h3>
+                    <p class="text-[10px] text-slate-600 mt-1">Content first</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-6 bg-slate-900/40 border-t border-slate-800/40 text-center">
+            <p class="text-[9px] text-slate-500 uppercase tracking-[0.2em] font-bold">More templates coming in v11.0.0</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <!-- Toast -->
 <div id="toast" class="toast"></div>
@@ -810,6 +1027,7 @@ function handleDrop(e, targetIdx) {
     renderElements();
     draggedIdx = null;
     showToast('Reordered', 'swap_vert');
+    syncPulse();
 }
 
 // ========== ACTIONS ==========
@@ -820,6 +1038,7 @@ function duplicateEl(idx) {
     selectedIndices = [idx + 1];
     renderElements();
     showToast('Duplicated', 'content_copy');
+    syncPulse();
 }
 
 function deleteEl(idx) {
@@ -829,6 +1048,7 @@ function deleteEl(idx) {
     selectedIndices = elements.length > 0 ? [Math.max(0, idx - 1)] : [];
     renderElements();
     showToast('Deleted', 'delete');
+    syncPulse();
 }
 
 // ========== RESIZING ==========
@@ -1443,6 +1663,313 @@ document.getElementById('generate-ai-btn').addEventListener('click', async () =>
 });
 
 setTimeout(syncPulse, 1000);
+
+// ========== PREVIEW SYSTEM ==========
+function generateFullHTML() {
+    const bodyContent = elements.map(el => {
+        if (el.type === 'ai-generated') return el.html;
+        const styles = el.style || '';
+        const type = el.type || 'module';
+        if (type === 'section') return `<section style="${styles}">${el.html}</section>`;
+        if (type === 'container') return `<div style="max-width:1200px;margin:0 auto;${styles}">${el.html}</div>`;
+        return `<div style="${styles}">${el.html}</div>`;
+    }).join('\n');
+
+    const html = [
+        '<!DOCTYPE html>',
+        '<html lang="en">',
+        '<head>',
+        '    <meta charset="UTF-8">',
+        '    <meta name="viewport" content="width=device-width, initial-scale=1.0">',
+        '    <title>Ez D&d Preview</title>',
+        '    <script src="https://cdn.tailwindcss.com"><\/script>',
+        '    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">',
+        '    <style>',
+        "        body { font-family: 'Inter', sans-serif; overflow-x: hidden; margin: 0; padding: 0; }",
+        '    </style>',
+        '</head>',
+        '<body>',
+        bodyContent,
+        '</body>',
+        '</html>'
+    ].join('\n');
+    return html;
+}
+
+function updateLivePreview() {
+    const iframe = document.getElementById('preview-iframe');
+    if (!iframe) return;
+    const html = generateFullHTML();
+    const blob = new Blob([html], { type: 'text/html' });
+    iframe.src = URL.createObjectURL(blob);
+}
+
+document.getElementById('save-btn').addEventListener('click', () => {
+    const name = document.getElementById('project-name-top').value;
+    localStorage.setItem('ez-dd-project-name', name);
+    showToast('Project "' + name + '" Saved', 'save');
+});
+
+document.getElementById('preview-btn').addEventListener('click', () => {
+    openModal('preview-modal');
+    updateLivePreview();
+});
+
+document.getElementById('close-preview-btn').addEventListener('click', () => {
+    closeModal('preview-modal');
+});
+
+document.getElementById('preview-new-tab').addEventListener('click', () => {
+    const html = generateFullHTML();
+    const win = window.open();
+    if (win) {
+        win.document.write(html);
+        win.document.close();
+    } else {
+        showToast('Pop-up blocked!', 'warning');
+    }
+});
+
+document.querySelectorAll('.preview-device-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const width = e.target.dataset.width;
+        document.getElementById('preview-iframe').style.width = width;
+        
+        document.querySelectorAll('.preview-device-btn').forEach(b => {
+            b.classList.remove('text-emerald-400', 'bg-slate-800');
+            b.classList.add('text-slate-500');
+        });
+        e.target.classList.add('text-emerald-400', 'bg-slate-800');
+        e.target.classList.remove('text-slate-500');
+    });
+});
+
+// ========== EXPORT & TEMPLATES ==========
+document.getElementById('export-btn').addEventListener('click', () => openModal('export-modal'));
+
+document.getElementById('copy-html-btn-modal').addEventListener('click', () => {
+    const html = generateFullHTML();
+    navigator.clipboard.writeText(html).then(() => {
+        const overlay = document.getElementById('copy-success-overlay');
+        overlay.classList.remove('hidden');
+        setTimeout(() => overlay.classList.add('hidden'), 3000);
+        showToast('HTML Copied!', 'content_copy');
+    });
+});
+
+document.getElementById('export-zip-btn').addEventListener('click', () => {
+    const zip = new JSZip();
+    const html = generateFullHTML();
+    const projectName = document.getElementById('project-name-top').value || 'ez-dd-project';
+    
+    zip.file("index.html", html);
+    zip.file("README.md", `# ${projectName}\nGenerated with Ez D&d`);
+    
+    zip.generateAsync({type:"blob"}).then(function(content) {
+        saveAs(content, `${projectName}.zip`);
+        showToast('ZIP Bundle Generated', 'folder_zip');
+        closeModal('export-modal');
+    });
+});
+
+function applyTemplate(name) {
+    if (!confirm('This will replace your current design. Continue?')) return;
+    saveToUndo();
+    elements = []; // Clear current
+    
+    if (name === 'portfolio') {
+        elements = [
+            { type: 'section', style: 'background:#0f172a;color:#fff;padding:120px 0;text-align:center;', html: '<h1 class="text-7xl font-black mb-4 tracking-tighter">I am a Designer.</h1><p class="text-slate-400 text-xl max-w-2xl mx-auto mb-10">Building digital experiences that matter with minimalist precision.</p><div class="flex gap-4 justify-center"><button class="px-8 py-3 bg-emerald-500 rounded font-bold text-sm uppercase">Work</button><button class="px-8 py-3 border border-slate-700 rounded font-bold text-sm uppercase">Contact</button></div>' },
+            { type: 'section', style: 'background:#fff;color:#000;padding:80px 0;', html: '<div class="max-w-4xl mx-auto grid grid-cols-2 gap-12"><div><h2 class="text-3xl font-bold mb-4">About Me</h2><p class="text-slate-600">Passionate about clean code and minimalist design. I specialize in high-performance web applications.</p></div><div><h2 class="text-3xl font-bold mb-4">Skills</h2><div class="flex flex-wrap gap-2"><span class="px-3 py-1 bg-slate-100 rounded text-xs font-bold uppercase tracking-widest">UI/UX</span><span class="px-3 py-1 bg-slate-100 rounded text-xs font-bold uppercase tracking-widest">REACT</span><span class="px-3 py-1 bg-slate-100 rounded text-xs font-bold uppercase tracking-widest">TAILWIND</span></div></div></div>' }
+        ];
+    } else if (name === 'landing') {
+        elements = [
+            { type: 'section', style: 'background:linear-gradient(to bottom, #10b981, #064e3b);color:#fff;padding:140px 0;text-align:center;', html: '<h1 class="text-8xl font-black mb-6 tracking-tighter">Launch Faster.</h1><p class="text-emerald-100 text-2xl mb-12 max-w-3xl mx-auto opacity-80 leading-relaxed">The ultimate platform for your next big idea. No code, just raw architectural precision.</p><button class="px-12 py-5 bg-white text-emerald-900 font-bold rounded-full text-lg shadow-2xl hover:scale-105 transition-transform">Get Started Free</button>' },
+            { type: 'section', style: 'background:#f8fafc;padding:100px 0;', html: '<div class="max-w-6xl mx-auto text-center"><h2 class="text-[10px] uppercase tracking-[0.4em] text-emerald-600 font-black mb-12">Trusted by 2000+ Innovators</h2><div class="grid grid-cols-5 gap-8 opacity-40 grayscale"><div class="h-12 bg-slate-300 rounded"></div><div class="h-12 bg-slate-300 rounded"></div><div class="h-12 bg-slate-300 rounded"></div><div class="h-12 bg-slate-300 rounded"></div><div class="h-12 bg-slate-300 rounded"></div></div></div>' }
+        ];
+    } else if (name === 'business') {
+        elements = [
+            { type: 'section', style: 'background:#1e293b;color:#fff;padding:24px 0;border-bottom:1px solid rgba(255,255,255,0.05);', html: '<nav class="max-w-7xl mx-auto flex justify-between items-center px-8"><div class="font-black text-2xl tracking-tighter">AXIOM.</div><div class="flex gap-10 text-[10px] font-bold uppercase tracking-widest text-slate-400"><span>Solution</span><span>Global</span><span>Enterprise</span><span class="text-white">Partner</span></div></nav>' },
+            { type: 'section', style: 'padding:160px 0;background:#fff;', html: '<div class="max-w-7xl mx-auto flex items-center gap-20 px-8"><div><h1 class="text-6xl font-black text-slate-900 mb-8 leading-[0.9] tracking-tight">Modern Industry Standards for the Future.</h1><p class="text-slate-500 text-xl mb-10 max-w-xl leading-relaxed">We provide end-to-end consulting and engineering solutions for the world’s most ambitious energy and tech firms.</p><div class="flex gap-4"><button class="px-10 py-4 bg-slate-900 text-white font-bold rounded shadow-xl tracking-widest text-xs">GLOBAL REACH</button><button class="px-10 py-4 border border-slate-200 text-slate-900 font-bold rounded tracking-widest text-xs">ENQUIRE</button></div></div><div class="flex-1 h-[450px] bg-slate-100 rounded-3xl shadow-inner border border-slate-200"></div></div>' }
+        ];
+    } else if (name === 'blog') {
+        elements = [
+            { type: 'section', style: 'padding:100px 0;border-bottom:1px solid #eef2f6;text-align:center;background:#fff;', html: '<div class="max-w-3xl mx-auto"><h1 class="text-5xl font-serif font-black mb-4 italic tracking-tight text-slate-900">The Minimalist Mind.</h1><p class="text-slate-500 font-serif text-lg leading-relaxed">Curated thoughts on architecture, technology, and the subtle art of doing less.</p></div>' },
+            { type: 'section', style: 'padding:100px 0;max-width:700px;margin:0 auto;background:#fff;', html: '<article class="mb-20"><div class="flex items-center gap-4 mb-4"><span class="px-3 py-1 bg-slate-950 text-white font-bold text-[9px] uppercase tracking-widest">DESIGN</span><span class="text-slate-400 text-xs font-serif">July 23, 2024 — 6 min read</span></div><h2 class="text-5xl font-bold mt-2 mb-6 leading-tight tracking-tighter text-slate-900 hover:text-emerald-600 transition-colors cursor-pointer">Why Minimalism is the Future of Product Design.</h2><p class="text-slate-600 text-xl font-serif leading-[1.8]">The complexity of modern lives demands a return to simplicity. In this essay, we explore how stripping away features leads to more meaningful interactions...</p><div class="mt-10 pt-10 border-t border-slate-50 font-bold text-sm tracking-widest uppercase text-slate-400 hover:text-slate-900 transition-colors cursor-pointer">CONTINUE READING →</div></article>' }
+        ];
+    }
+    
+    renderElements();
+    closeModal('templates-modal');
+    showToast(`${name.charAt(0).toUpperCase() + name.slice(1)} Template Applied`, 'auto_awesome');
+    syncPulse();
+}
+
+// ========== CLOUD SYNC ==========
+const API_URL = 'http://localhost:5000/api';
+let currentProjectId = new URLSearchParams(window.location.search).get('id');
+
+async function loadProject() {
+    if (!currentProjectId) return;
+    try {
+        const response = await fetch(`${API_URL}/projects/${currentProjectId}`);
+        // Note: Project endpoint usually returns array if searching by userId, 
+        // but here we might need a specific project detail endpoint or logic
+        // For MVP, if it's a mongo ID, we'll try to find it.
+        // Actually, my backend serves GET /api/projects/:userId
+        const data = await response.json();
+        // Matching ID from the returned list
+        const project = data.find(p => p._id === currentProjectId);
+        if (project) {
+            elements = project.canvasData || [];
+            document.getElementById('project-name-top').value = project.projectName;
+            renderElements();
+            showToast('Cloud Project Loaded', 'cloud_done');
+        }
+    } catch (err) {
+        console.warn('Could not load from cloud, using local storage.');
+    }
+}
+
+async function saveToCloud() {
+    if (!currentProjectId) {
+        // Create new project if none exists
+        try {
+            const name = document.getElementById('project-name-top').value;
+            const res = await fetch(`${API_URL}/projects`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: '123', projectName: name, canvasData: elements })
+            });
+            const data = await res.json();
+            currentProjectId = data._id;
+            window.history.replaceState({}, '', `?id=${data._id}`);
+            showToast('Project Created in Cloud!', 'cloud_upload');
+        } catch (err) { showToast('Sync failed', 'error'); }
+        return;
+    }
+
+    try {
+        const name = document.getElementById('project-name-top').value;
+        await fetch(`${API_URL}/projects/${currentProjectId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ projectName: name, canvasData: elements })
+        });
+        showToast('Changes Saved to Cloud', 'cloud_done');
+    } catch (err) {
+        showToast('Error saving to cloud', 'error_outline');
+    }
+}
+
+document.getElementById('save-btn').addEventListener('click', saveToCloud);
+
+document.getElementById('project-name-top').addEventListener('blur', (e) => {
+    localStorage.setItem('ez-dd-project-name', e.target.value);
+    showToast('Renamed to: ' + e.target.value, 'edit');
+    if (currentProjectId) saveToCloud();
+});
+
+// Initialize
+window.addEventListener('load', loadProject);
+
+// ========== PUBLISH WORKFLOW ==========
+document.getElementById('publish-btn-toolbar').addEventListener('click', () => {
+    const name = document.getElementById('project-name-top').value;
+    openModal('publish-modal');
+    document.getElementById('deploying-state').classList.remove('hidden');
+    document.getElementById('publish-success-state').classList.add('hidden');
+    
+    // Simulate deployment process
+    setTimeout(() => {
+        document.getElementById('deploying-state').classList.add('hidden');
+        document.getElementById('publish-success-state').classList.remove('hidden');
+        
+        // Generate a random stable-looking ID
+        const siteId = name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Math.random().toString(36).substring(7);
+        document.getElementById('published-url').textContent = `https://ezdd.io/p/${siteId}`;
+        showToast('Deployment Successful', 'rocket_launch');
+    }, 2500);
+});
+
+document.getElementById('copy-url-btn').addEventListener('click', () => {
+    const url = document.getElementById('published-url').textContent;
+    navigator.clipboard.writeText(url).then(() => {
+        showToast('URL Copied to clipboard', 'content_paste');
+    });
+});
+
+document.getElementById('view-live-btn').addEventListener('click', () => {
+    const html = generateFullHTML();
+    const win = window.open();
+    if (win) {
+        win.document.write(html);
+        win.document.close();
+    }
+});
+
+// ========== AI ORACLE INTEGRATION ==========
+const AI_ENDPOINT = 'http://localhost:5000/api/ai/generate-component';
+
+document.getElementById('ai-gen-btn').addEventListener('click', async () => {
+    const prompt = document.getElementById('ai-prompt').value;
+    const btn = document.getElementById('ai-gen-btn');
+    const genText = btn.querySelector('.gen-text');
+    
+    if (!prompt || prompt.trim().length < 4) {
+        showToast('Describe what you want me to build!', 'error_outline');
+        return;
+    }
+
+    try {
+        // Loading State
+        btn.disabled = true;
+        genText.textContent = 'Summoning AI...';
+        btn.classList.add('bg-emerald-800');
+        
+        const response = await fetch(AI_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+        });
+
+        if (!response.ok) throw new Error('AI Overload - Try again');
+
+        const data = await response.json();
+        
+        if (data.success && data.html) {
+            saveToUndo();
+            // Create a new section with the AI result
+            const newElement = {
+                type: 'section',
+                style: 'padding: 60px 0; background: #fff;', // Default wrapper
+                html: data.html
+            };
+            
+            elements.push(newElement);
+            renderElements();
+            showToast('Magic Component Generated!', 'auto_awesome');
+            document.getElementById('ai-prompt').value = '';
+        }
+
+    } catch (err) {
+        console.error('AI Error:', err);
+        showToast('The AI was shy. Try another prompt.', 'warning');
+    } finally {
+        btn.disabled = false;
+        genText.textContent = 'Generate Magic';
+        btn.classList.remove('bg-emerald-800');
+    }
+});
+
+// Update preview live if modal is open...
+const originalSyncPulse = typeof syncPulse !== 'undefined' ? syncPulse : () => {};
+syncPulse = function() {
+    if (typeof originalSyncPulse === 'function') originalSyncPulse();
+    if (document.getElementById('preview-modal').classList.contains('active')) {
+        updateLivePreview();
+    }
+};
 </script>
 </body>
 </html>

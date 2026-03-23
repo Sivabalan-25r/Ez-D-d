@@ -89,10 +89,14 @@
 </head>
 <body class="bg-background text-on-surface selection:bg-primary/30 selection:text-primary">
 <main class="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
-<!-- Abstract Architectural Background Elements -->
-<div class="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
-<div class="absolute top-[-10%] left-[-5%] w-[40%] h-[60%] bg-emerald-900/10 rounded-full mix-blend-screen filter blur-3xl opacity-30"></div>
-<div class="absolute bottom-[-10%] right-[-5%] w-[40%] h-[60%] bg-slate-800/50 rounded-full mix-blend-screen filter blur-3xl opacity-30"></div>
+<!-- Abstract Light Rays Background Component -->
+<div class="fixed inset-0 z-0 bg-background overflow-hidden" style="perspective: 1000px;">
+    <!-- We will draw the rays via CSS and JS on this canvas -->
+    <canvas id="light-rays-canvas" class="w-full h-full opacity-60"></canvas>
+    
+    <!-- Retain slight colored glowing blur behind the cards -->
+    <div class="absolute top-[10%] left-[20%] w-[30%] h-[40%] bg-emerald-900/10 rounded-full mix-blend-screen filter blur-[100px] opacity-40"></div>
+    <div class="absolute bottom-[20%] right-[20%] w-[40%] h-[40%] bg-slate-800/40 rounded-full mix-blend-screen filter blur-[100px] opacity-40"></div>
 </div>
 <!-- Login Container -->
 <div class="relative z-10 w-full max-w-[440px]">
@@ -209,10 +213,8 @@
 </div>
 </div>
 <!-- Utility Footer -->
-<div class="mt-12 flex justify-center gap-8">
 <a class="text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-primary transition-colors" href="#" id="docs-link">Docs</a>
 <a class="text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-primary transition-colors" href="#" id="privacy-link">Privacy</a>
-<a class="text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-primary transition-colors" href="#" id="support-link">Support</a>
 </div>
 </div>
 </main>
@@ -407,18 +409,104 @@ document.getElementById('docs-link').addEventListener('click', (e) => {
     e.preventDefault();
     showToast('Documentation: docs.ezdd.app', 'description');
 });
-document.getElementById('privacy-link').addEventListener('click', (e) => {
-    e.preventDefault();
-    showToast('Privacy Policy: Your data is safe with us', 'security');
-});
-document.getElementById('support-link').addEventListener('click', (e) => {
-    e.preventDefault();
-    showToast('Support: help@ezdd.app', 'support_agent');
-});
-
 // ========== KEYBOARD ==========
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
 });
+</script>
+
+<!-- Light Rays Animation Script -->
+<script>
+    (function() {
+        const canvas = document.getElementById('light-rays-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        let w, h;
+        const rayCount = 40;
+        const rays = [];
+        
+        function resize() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+            initRays();
+        }
+        
+        class Ray {
+            constructor() {
+                this.reset();
+            }
+            
+            reset() {
+                // Origin from top left area to create a dramatic angle
+                this.x = (Math.random() - 0.2) * w; 
+                this.y = -h * 0.2;
+                
+                this.width = 10 + Math.random() * 40;
+                this.length = h * 1.5 + Math.random() * h;
+                this.angle = (Math.PI / 4) + (Math.random() - 0.5) * 0.6;
+                
+                this.speed = 0.0002 + Math.random() * 0.0005;
+                this.phase = Math.random() * Math.PI * 2;
+                this.opacity = 0;
+                this.maxOpacity = 0.03 + Math.random() * 0.08;
+                
+                // Emerald to Teal transition
+                const isTeal = Math.random() > 0.5;
+                this.color = isTeal ? "45, 212, 191" : "16, 185, 129";
+            }
+            
+            update() {
+                this.angle += this.speed;
+                this.phase += 0.005;
+                this.opacity = (Math.sin(this.phase) + 1) / 2 * this.maxOpacity;
+                
+                if (this.angle > Math.PI * 0.8) this.reset();
+            }
+            
+            draw() {
+                const endX = this.x + Math.cos(this.angle) * this.length;
+                const endY = this.y + Math.sin(this.angle) * this.length;
+                
+                const grad = ctx.createLinearGradient(this.x, this.y, endX, endY);
+                grad.addColorStop(0, `rgba(${this.color}, 0)`);
+                grad.addColorStop(0.3, `rgba(${this.color}, ${this.opacity})`);
+                grad.addColorStop(1, `rgba(${this.color}, 0)`);
+                
+                ctx.save();
+                ctx.beginPath();
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = this.width;
+                ctx.lineCap = 'round';
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+        
+        function initRays() {
+            rays.length = 0;
+            for (let i = 0; i < rayCount; i++) {
+                rays.push(new Ray());
+            }
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, w, h);
+            ctx.globalCompositeOperation = 'lighter';
+            
+            for (let ray of rays) {
+                ray.update();
+                ray.draw();
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        window.addEventListener('resize', resize);
+        resize();
+        animate();
+    })();
 </script>
 </body></html>
