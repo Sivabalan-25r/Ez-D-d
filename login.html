@@ -6,6 +6,7 @@
 <title>Login | Ez D&d</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
@@ -247,9 +248,14 @@
 </footer>
 
 <script>
-const supabaseUrl = 'https://nndivhbpkciwbspyadho.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5uZGl2aGJwa2Npd2JzcHlhZGhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyOTc0NDAsImV4cCI6MjA4OTg3MzQ0MH0.Pu3uLp45Wh-7hgAyyzzuqFghTuB60VWekFQKKdb6BDo';
-const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+// ========== SESSION LOGIC ==========
+_supabase.auth.getSession().then(({ data: { session }, error }) => {
+    if (error) {
+        console.error('Session check error:', error);
+    } else if (session) {
+        window.location.href = 'http://localhost:5500/dashboard.html';
+    }
+});
 
 // ========== TOAST ==========
 function showToast(msg, icon = 'check_circle', isError = false) {
@@ -340,15 +346,27 @@ document.getElementById('login-form').addEventListener('submit', function(e) {
 });
 
 // ========== SSO LOGINS ==========
-document.getElementById('google-sso-btn').addEventListener('click', () => {
+document.getElementById('google-sso-btn').addEventListener('click', async () => {
     const btn = document.getElementById('google-sso-btn');
     btn.classList.add('btn-loading');
-    btn.querySelector('span').textContent = '...'
-    setTimeout(() => {
-        localStorage.setItem('ez-dd-user', JSON.stringify({ email: 'user@gmail.com', loggedIn: true, provider: 'google' }));
-        showToast('Google sign-in successful!', 'login');
-        setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
-    }, 1500);
+    btn.querySelector('span').textContent = '...';
+    
+    const { data, error } = await _supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            queryParams: {
+                prompt: 'select_account'
+            },
+            redirectTo: 'http://localhost:5500/dashboard.html'
+        }
+    });
+
+    if (error) {
+        console.error('Google Auth Error:', error.message);
+        showToast(error.message || 'Google Auth Error', 'error', true);
+        btn.classList.remove('btn-loading');
+        btn.querySelector('span').textContent = 'Google';
+    }
 });
 
 document.getElementById('github-sso-btn').addEventListener('click', () => {

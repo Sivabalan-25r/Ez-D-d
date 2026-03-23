@@ -1,27 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const JSZip = require('jszip');
-const Project = require('../models/Project');
 const { generateHTML } = require('../services/generator');
 
-// POST /export/:projectId
-router.post('/:projectId', async (req, res) => {
+// POST /export
+router.post('/', async (req, res) => {
     try {
-        const project = await Project.findById(req.params.projectId);
-        if (!project) return res.status(404).json({ error: "Project not found" });
+        const { canvasData, projectName } = req.body;
+        if (!canvasData) return res.status(400).json({ error: "Missing canvas data" });
 
         const zip = new JSZip();
-        const html = generateHTML(project.canvasData);
+        const html = generateHTML(canvasData);
         
         // Bundle into ZIP
         zip.file("index.html", html);
-        zip.file("project.json", JSON.stringify(project.canvasData, null, 2));
+        zip.file("project.json", JSON.stringify(canvasData, null, 2));
         
         const content = await zip.generateAsync({ type: "nodebuffer" });
+        const name = projectName ? projectName.replace(/\s+/g, '_') : 'project';
         
         res.set({
             'Content-Type': 'application/zip',
-            'Content-Disposition': `attachment; filename="${project.projectName.replace(/\s+/g, '_')}_export.zip"`,
+            'Content-Disposition': `attachment; filename="${name}_export.zip"`,
             'Content-Length': content.length
         });
         

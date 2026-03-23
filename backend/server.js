@@ -4,7 +4,7 @@ const cors = require('cors');
 
 // Route Imports
 const aiRoutes = require('./routes/ai');
-const authRoutes = require('./routes/auth').router;
+// const authRoutes = require('./routes/auth').router; // Superseded by Supabase
 const projectRoutes = require('./routes/projects');
 const assetRoutes = require('./routes/assets');
 const exportRoutes = require('./routes/export');
@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
 
 // API Routes
 app.use('/api/ai', aiRoutes);
-app.use('/api/auth', authRoutes);
+// app.use('/api/auth', authRoutes); // Handled by frontend via Supabase
 app.use('/api/projects', projectRoutes);
 app.use('/api/assets', assetRoutes);
 app.use('/api/export', exportRoutes);

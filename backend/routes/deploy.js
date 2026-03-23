@@ -2,17 +2,16 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const JSZip = require('jszip');
-const Project = require('../models/Project');
 const { generateHTML } = require('../services/generator');
 
-// POST /deploy/:projectId
-router.post('/:projectId', async (req, res) => {
+// POST /deploy
+router.post('/', async (req, res) => {
     try {
-        const project = await Project.findById(req.params.projectId);
-        if (!project) return res.status(404).json({ error: "Project not found" });
+        const { canvasData } = req.body;
+        if (!canvasData) return res.status(400).json({ error: "Missing canvas data" });
 
         const zip = new JSZip();
-        zip.file("index.html", generateHTML(project.canvasData));
+        zip.file("index.html", generateHTML(canvasData));
         const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
 
         // Netlify Deployment
@@ -35,11 +34,6 @@ router.post('/:projectId', async (req, res) => {
         );
 
         const deployUrl = netlifyResponse.data.ssl_url || netlifyResponse.data.url;
-        
-        // Update Project record
-        project.published = true;
-        project.publishUrl = deployUrl;
-        await project.save();
 
         res.json({
             success: true,
