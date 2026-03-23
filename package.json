@@ -1,5 +1,14 @@
 {
-  "dependencies": {
-    "@supabase/supabase-js": "^2.100.0"
+  "name": "ez-dd-root",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && npm run dev",
+    "frontend": "live-server --port=5500",
+    "install-all": "npm install && cd backend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "live-server": "^1.2.2"
   }
 }

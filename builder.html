@@ -7,6 +7,9 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 <script id="tailwind-config">
         tailwind.config = {
           darkMode: "class",
@@ -1985,64 +1988,80 @@ const API_URL = 'http://localhost:5000/api';
 let currentProjectId = new URLSearchParams(window.location.search).get('id');
 
 async function loadProject() {
+    // 1. Check for Active Project in LocalStorage (set by dashboard)
+    const activeProject = JSON.parse(localStorage.getItem('ez-dd-active-project'));
+    
+    if (activeProject) {
+        elements = activeProject.canvasData || [];
+        document.getElementById('project-name-top').value = activeProject.name || 'Untitled Project';
+        currentProjectId = activeProject.id;
+        renderElements();
+        showToast('Active Blueprint Loaded', 'verified');
+        return;
+    }
+
+    // 2. URL Param Fallback (Cloud Backup)
     if (!currentProjectId) return;
     try {
         const response = await fetch(`${API_URL}/projects/${currentProjectId}`);
-        // Note: Project endpoint usually returns array if searching by userId, 
-        // but here we might need a specific project detail endpoint or logic
-        // For MVP, if it's a mongo ID, we'll try to find it.
-        // Actually, my backend serves GET /api/projects/:userId
         const data = await response.json();
-        // Matching ID from the returned list
         const project = data.find(p => p._id === currentProjectId);
         if (project) {
             elements = project.canvasData || [];
             document.getElementById('project-name-top').value = project.projectName;
             renderElements();
-            showToast('Cloud Project Loaded', 'cloud_done');
+            showToast('Cloud Snapshot Hydrated', 'cloud_done');
         }
     } catch (err) {
-        console.warn('Could not load from cloud, using local storage.');
+        console.warn('Hydration from cloud failed, using safe defaults.');
     }
 }
 
 async function saveToCloud() {
-    if (!currentProjectId) {
-        // Create new project if none exists
-        try {
-            const name = document.getElementById('project-name-top').value;
-            const res = await fetch(`${API_URL}/projects`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: '123', projectName: name, canvasData: elements })
-            });
-            const data = await res.json();
-            currentProjectId = data._id;
-            window.history.replaceState({}, '', `?id=${data._id}`);
-            showToast('Project Created in Cloud!', 'cloud_upload');
-        } catch (err) { showToast('Sync failed', 'error'); }
-        return;
-    }
+    const name = document.getElementById('project-name-top').value || 'Untitled Project';
+    const activeProject = {
+        id: currentProjectId || Date.now(),
+        name: name,
+        canvasData: elements,
+        status: 'draft',
+        edited: 'Just now',
+        img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426'
+    };
 
-    try {
-        const name = document.getElementById('project-name-top').value;
-        await fetch(`${API_URL}/projects/${currentProjectId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ projectName: name, canvasData: elements })
-        });
-        showToast('Changes Saved to Cloud', 'cloud_done');
-    } catch (err) {
-        showToast('Error saving to cloud', 'error_outline');
+    // 1. Update Local Gallery List (For Dashboard)
+    const localProjects = JSON.parse(localStorage.getItem('ez-dd-projects')) || [];
+    const existingIdx = localProjects.findIndex(p => p.id == activeProject.id || p.name == activeProject.name);
+    
+    if (existingIdx !== -1) {
+        localProjects[existingIdx] = activeProject;
+    } else {
+        localProjects.push(activeProject);
+    }
+    localStorage.setItem('ez-dd-projects', JSON.stringify(localProjects));
+    localStorage.setItem('ez-dd-active-project', JSON.stringify(activeProject));
+
+    // 2. Optional Cloud Backup (Non-blocking)
+    if (currentProjectId) {
+        try {
+            await fetch(`${API_URL}/projects/${currentProjectId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ projectName: name, canvasData: elements })
+            });
+            showToast('Cloud & Local Sync Complete', 'cloud_done');
+        } catch (err) {
+            showToast('Saved locally (Offline)', 'save');
+        }
+    } else {
+        showToast('Project Secure in Gallery', 'save');
     }
 }
 
 document.getElementById('save-btn').addEventListener('click', saveToCloud);
 
 document.getElementById('project-name-top').addEventListener('blur', (e) => {
-    localStorage.setItem('ez-dd-project-name', e.target.value);
     showToast('Renamed to: ' + e.target.value, 'edit');
-    if (currentProjectId) saveToCloud();
+    saveToCloud();
 });
 
 // Initialize

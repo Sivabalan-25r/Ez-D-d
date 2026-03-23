@@ -5,8 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Ez D&d - Dashboard</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabaseClient.js"></script>
+<!-- Local-First Architectural Systems -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
@@ -126,7 +125,7 @@
 <input type="text" placeholder="Search projects..." class="h-10 w-48 bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-3 text-sm text-slate-200 focus:outline-none focus:border-primary/50 placeholder:text-slate-500" id="search-input">
 <span class="material-symbols-outlined absolute left-2.5 top-2 text-slate-500 !text-[20px]">search</span>
 </div>
-<a href="builder.html" class="flex items-center gap-2 bg-primary hover:bg-emerald-500 text-slate-900 px-6 py-3 rounded-lg shadow-lg hover:shadow-emerald-500/20 transition-all active:scale-95 font-bold" id="new-project-btn">
+<a href="builder.html" class="flex items-center gap-2 bg-primary hover:bg-emerald-500 text-slate-900 px-6 py-3 rounded-lg shadow-lg hover:shadow-emerald-500/20 transition-all active:scale-95 font-bold" id="new-project-btn" onclick="localStorage.removeItem('ez-dd-active-project')">
 <span class="material-symbols-outlined" data-icon="add">add</span>
 <span>New Project</span>
 </a>
@@ -195,16 +194,14 @@
 
 <script>
 // ========== SESSION LOGIC ==========
-_supabase.auth.getSession().then(({ data: { session }, error }) => {
-    if (error || !session) {
-        window.location.href = 'http://localhost:5500/login.html';
-    } else {
-        const email = session.user.email;
-        const name = session.user.user_metadata?.full_name || email || 'User';
-        const userDisplayName = document.getElementById('user-display-name');
-        if (userDisplayName) userDisplayName.textContent = name;
-    }
-});
+const userSession = JSON.parse(localStorage.getItem('ez-dd-user'));
+if (!userSession || !userSession.loggedIn) {
+    window.location.href = 'login.html';
+} else {
+    const name = userSession.name || userSession.email.split('@')[0] || 'Local Creator';
+    const userDisplayName = document.getElementById('user-display-name');
+    if (userDisplayName) userDisplayName.textContent = name;
+}
 
 // ========== TOAST ==========
 function showToast(msg, icon = 'check_circle') {
@@ -388,19 +385,10 @@ document.addEventListener('click', (e) => {
     }
 });
 
-signoutBtn.addEventListener('click', async () => {
+signoutBtn.addEventListener('click', () => {
     signoutBtn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">sync</span> Signing out...`;
-    if (typeof _supabase !== 'undefined' && _supabase) {
-        await _supabase.auth.signOut();
-    }
     localStorage.removeItem('ez-dd-user');
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('sb-')) {
-            localStorage.removeItem(key);
-        }
-    }
-    window.location.href = 'http://localhost:5500/login.html';
+    window.location.href = 'login.html';
 });
 
 // ========== FOOTER ==========
