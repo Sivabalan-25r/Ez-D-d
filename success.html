@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ez D&amp;d - Published Successfully</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#10B981",
+              "background": "#020617",
+              "surface": "#0f172a",
+              "surface-container": "#1e293b",
+              "on-surface": "#f8fafc",
+              "on-surface-variant": "#94a3b8",
+              "outline-variant": "#334155",
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .toast {
+            position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: #1e293b; color: #f8fafc; padding: 10px 20px; border-radius: 10px;
+            font-size: 12px; font-weight: 600; z-index: 9999; opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(16,185,129,0.3); box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast .toast-icon { color: #10B981; margin-right: 6px; vertical-align: middle; font-size: 16px; }
+
+        /* Confetti animation */
+        @keyframes confettiDrop {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        .confetti { position: fixed; top: 0; width: 8px; height: 8px; z-index: 200; pointer-events: none; border-radius: 2px; }
+
+        /* Success check animation */
+        @keyframes scaleIn {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .success-icon { animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both; }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .slide-up { animation: slideUp 0.5s ease forwards; }
+        .slide-up-1 { animation-delay: 0.3s; opacity: 0; }
+        .slide-up-2 { animation-delay: 0.5s; opacity: 0; }
+        .slide-up-3 { animation-delay: 0.7s; opacity: 0; }
+        .slide-up-4 { animation-delay: 0.9s; opacity: 0; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-body">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-slate-900/60 backdrop-blur-xl flex items-center justify-between px-6 h-16">
+<a href="index.html" class="text-xl font-semibold tracking-tighter text-emerald-400 hover:text-emerald-300 transition-colors">Ez Dd</a>
+<div class="hidden md:flex items-center gap-8">
+<a class="font-sans text-sm font-medium tracking-tight text-slate-400 hover:text-emerald-300 transition-colors active:scale-95 duration-200" href="index.html">Preview</a>
+<a class="font-sans text-sm font-bold tracking-tight text-emerald-400 transition-colors active:scale-95 duration-200" href="success.html">Publish</a>
+<a class="font-sans text-sm font-medium tracking-tight text-slate-400 hover:text-emerald-300 transition-colors active:scale-95 duration-200" href="builder.html">Export</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="font-sans text-sm font-medium tracking-tight text-slate-400 cursor-pointer hover:text-emerald-300 transition-colors" id="help-btn">Help</button>
+<a href="dashboard.html" class="material-symbols-outlined text-slate-100 cursor-pointer hover:text-emerald-400 transition-colors" data-icon="account_circle">account_circle</a>
+</div>
+</nav>
+<!-- SideNavBar (Left) -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 z-40 bg-slate-900 flex flex-col items-center py-4 space-y-4">
+<div class="px-2 mb-2 text-center">
+<h3 class="text-[10px] uppercase tracking-widest font-bold text-emerald-400">Components</h3>
+</div>
+<div class="flex flex-col w-full">
+<div class="sidebar-comp flex flex-col items-center gap-1 p-3 text-emerald-400 bg-emerald-500/10 border-r-2 border-emerald-500 transition-all duration-300 cursor-pointer" data-comp="dashboard">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+</div>
+<div class="sidebar-comp flex flex-col items-center gap-1 p-3 text-slate-500 hover:bg-slate-800 hover:text-slate-200 transition-all duration-300 cursor-pointer" data-comp="title">
+<span class="material-symbols-outlined" data-icon="title">title</span>
+</div>
+<div class="sidebar-comp flex flex-col items-center gap-1 p-3 text-slate-500 hover:bg-slate-800 hover:text-slate-200 transition-all duration-300 cursor-pointer" data-comp="image">
+<span class="material-symbols-outlined" data-icon="image">image</span>
+</div>
+<div class="sidebar-comp flex flex-col items-center gap-1 p-3 text-slate-500 hover:bg-slate-800 hover:text-slate-200 transition-all duration-300 cursor-pointer" data-comp="form">
+<span class="material-symbols-outlined" data-icon="format_align_left">format_align_left</span>
+</div>
+<div class="sidebar-comp flex flex-col items-center gap-1 p-3 text-slate-500 hover:bg-slate-800 hover:text-slate-200 transition-all duration-300 cursor-pointer" data-comp="widgets">
+<span class="material-symbols-outlined" data-icon="widgets">widgets</span>
+</div>
+</div>
+<div class="mt-auto pt-4">
+<div class="flex items-center justify-center p-3 text-slate-500 hover:bg-slate-800 hover:text-slate-200 transition-all duration-300 cursor-pointer" id="settings-btn">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</div>
+</div>
+</aside>
+<!-- Main Builder Canvas (Background) -->
+<main class="ml-20 mr-64 pt-16 h-screen relative overflow-hidden bg-slate-950">
+<div class="max-w-4xl mx-auto mt-12 p-12 bg-slate-900/50 border border-slate-800 shadow-xl rounded-xl opacity-20 grayscale pointer-events-none">
+<div class="h-8 w-48 bg-slate-800 mb-8 rounded"></div>
+<div class="grid grid-cols-2 gap-8">
+<div class="h-64 bg-slate-800 rounded-lg"></div>
+<div class="space-y-4">
+<div class="h-4 w-full bg-slate-800 rounded"></div>
+<div class="h-4 w-full bg-slate-800 rounded"></div>
+<div class="h-4 w-3/4 bg-slate-800 rounded"></div>
+<div class="h-10 w-32 bg-emerald-500/10 rounded-md mt-6"></div>
+</div>
+</div>
+</div>
+<!-- Success Modal Overlay -->
+<div class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/80 backdrop-blur-md" id="success-overlay">
+<div class="bg-slate-900/40 border border-slate-800 w-full max-w-lg mx-4 rounded-xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.6)] relative overflow-hidden p-8 text-center backdrop-blur-xl">
+<!-- Success Decoration -->
+<div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-emerald-500 to-emerald-800"></div>
+<!-- Celebratory Icon -->
+<div class="mb-6 flex justify-center success-icon">
+<div class="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
+<span class="material-symbols-outlined text-emerald-500 text-4xl" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Headline -->
+<h2 class="text-3xl font-bold tracking-tighter text-slate-50 mb-3 slide-up slide-up-1">Ez D&amp;d: Your Site is Live!</h2>
+<p class="text-slate-400 text-sm mb-8 leading-relaxed max-w-xs mx-auto slide-up slide-up-2">Success! Your Ez D&amp;d creation is now public and ready for the world to see.</p>
+<!-- URL Link Display -->
+<div class="bg-slate-950/50 border border-slate-800 p-4 rounded-lg flex items-center justify-between mb-8 group slide-up slide-up-3">
+<div class="flex items-center gap-3 overflow-hidden">
+<span class="material-symbols-outlined text-emerald-500 shrink-0" data-icon="public">public</span>
+<span class="text-emerald-400 font-medium truncate" id="site-url">https://my-cool-site.ezdd.app</span>
+</div>
+<button class="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-emerald-500 hover:text-emerald-400 transition-colors ml-4 shrink-0 active:scale-95" id="copy-link-btn">
+<span class="material-symbols-outlined text-sm" data-icon="content_copy">content_copy</span>
+                        Copy Link
+                    </button>
+</div>
+<!-- QR Code & Actions Row -->
+<div class="flex flex-col sm:flex-row items-center justify-between gap-8 pt-6 border-t border-slate-800 slide-up slide-up-4">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 bg-white p-1 shadow-sm rounded-sm">
+<img alt="QR code for mobile website preview" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAo2cqFmmYyBqDhNA1euOKLAYVUuPE3y8Q8lB-McGeZ4nCQeKFueJlPClCe10o9C-iEF8-5Mg1ebrHTxYzrYGdKUvbPy2pJszO4J_-NLOaFnoLKCMfQkh9iZ6Zk1dYlWfm8Yr0-rruaBhpJzr8UFSYf8c33LpLrblomrN8Rt-2hF64Ea-QM6jb_NDdTzIiTVgpfiy66Nl_GahcIQoGIgiZkiOuq05-hopEf9Q1UlVO_-jO0UVze2zl17HjoLNkp_t42gxkxc3BZ6oU"/>
+</div>
+<div class="text-left">
+<p class="text-[10px] font-bold uppercase tracking-widest text-slate-300">Mobile Preview</p>
+<p class="text-[10px] text-slate-500">Scan to view on your device</p>
+</div>
+</div>
+<div class="flex items-center gap-3 w-full sm:w-auto">
+<a href="dashboard.html" class="flex-1 sm:flex-none px-6 py-2.5 rounded-lg font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors active:scale-95 text-sm text-center">
+                            Done
+                        </a>
+<a href="index.html" class="flex-1 sm:flex-none px-6 py-2.5 rounded-lg bg-emerald-600 text-white font-semibold shadow-lg shadow-emerald-900/20 hover:bg-emerald-500 active:scale-95 transition-all text-sm text-center">
+                            View Live
+                        </a>
+</div>
+</div>
+<!-- Share Buttons -->
+<div class="flex items-center justify-center gap-4 mt-6 pt-4 border-t border-slate-800/50">
+<span class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Share:</span>
+<button class="p-2 text-slate-500 hover:text-emerald-400 hover:bg-slate-800 rounded-lg transition-colors active:scale-95" id="share-twitter" title="Share on Twitter">
+<span class="material-symbols-outlined !text-[18px]">share</span>
+</button>
+<button class="p-2 text-slate-500 hover:text-emerald-400 hover:bg-slate-800 rounded-lg transition-colors active:scale-95" id="share-email" title="Share via Email">
+<span class="material-symbols-outlined !text-[18px]">mail</span>
+</button>
+<button class="p-2 text-slate-500 hover:text-emerald-400 hover:bg-slate-800 rounded-lg transition-colors active:scale-95" id="share-link" title="Copy Link">
+<span class="material-symbols-outlined !text-[18px]">link</span>
+</button>
+</div>
+<!-- Close Icon -->
+<button class="absolute top-4 right-4 p-2 text-slate-500 hover:text-emerald-400 transition-colors active:scale-95" id="close-modal-btn">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+</div>
+</main>
+<!-- SideNavBar (Right - Properties) -->
+<aside class="fixed right-0 top-16 h-[calc(100vh-64px)] w-64 z-40 bg-slate-900 flex flex-col border-l border-slate-800">
+<div class="p-6">
+<h3 class="text-xs font-medium text-emerald-400">Inspector</h3>
+<p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Properties</p>
+</div>
+<div class="flex border-b border-slate-800" id="prop-tabs">
+<div class="prop-tab flex-1 py-3 text-center text-emerald-400 font-medium border-b-2 border-emerald-500 ease-in-out cursor-pointer active" data-tab="style">Style</div>
+<div class="prop-tab flex-1 py-3 text-center text-slate-400 border-b border-slate-800 hover:text-emerald-300 ease-in-out cursor-pointer" data-tab="content">Content</div>
+<div class="prop-tab flex-1 py-3 text-center text-slate-400 border-b border-slate-800 hover:text-emerald-300 ease-in-out cursor-pointer" data-tab="layout">Layout</div>
+</div>
+<!-- Style Tab -->
+<div class="p-6 space-y-6 prop-content" id="ptab-style">
+<div class="space-y-2">
+<label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Typography</label>
+<select class="w-full h-9 bg-slate-950 rounded border border-slate-800 text-[11px] text-slate-300 px-2 focus:border-emerald-500/50 focus:outline-none">
+<option>Inter</option><option>Georgia</option><option>Arial</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Background</label>
+<input type="color" value="#020617" class="w-full h-9 bg-slate-950 rounded border border-slate-800 cursor-pointer">
+</div>
+</div>
+<!-- Content Tab -->
+<div class="p-6 space-y-6 prop-content hidden" id="ptab-content">
+<div class="space-y-2">
+<label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Page Title</label>
+<input type="text" class="w-full h-9 bg-slate-950 rounded border border-slate-800 text-[11px] text-slate-300 px-2 focus:border-emerald-500/50 focus:outline-none" value="My Website">
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Meta Description</label>
+<textarea class="w-full h-20 bg-slate-950 rounded border border-slate-800 text-[11px] text-slate-300 p-2 focus:border-emerald-500/50 focus:outline-none resize-none" placeholder="A short description..."></textarea>
+</div>
+</div>
+<!-- Layout Tab -->
+<div class="p-6 space-y-6 prop-content hidden" id="ptab-layout">
+<div class="space-y-2">
+<label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Max Width</label>
+<select class="w-full h-9 bg-slate-950 rounded border border-slate-800 text-[11px] text-slate-300 px-2 focus:border-emerald-500/50 focus:outline-none">
+<option>1200px</option><option>960px</option><option>100%</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Grid Columns</label>
+<input type="range" min="1" max="12" value="2" class="w-full accent-emerald-500">
+<div class="text-[10px] font-mono text-emerald-500 text-center">2 columns</div>
+</div>
+</div>
+</aside>
+<!-- Footer -->
+<footer class="fixed bottom-0 w-full h-8 z-40 bg-slate-950 border-t border-slate-800/50 flex items-center justify-between px-4">
+<span class="font-mono text-[10px] uppercase tracking-tighter text-emerald-500 opacity-80 hover:opacity-100 cursor-default">System: Operational</span>
+<div class="flex items-center gap-4">
+<span class="font-mono text-[10px] uppercase tracking-tighter text-slate-500">v2.4.0</span>
+<a class="font-mono text-[10px] uppercase tracking-tighter text-slate-500 hover:text-slate-300 opacity-80 hover:opacity-100" href="#" id="docs-link">Documentation</a>
+<a class="font-mono text-[10px] uppercase tracking-tighter text-slate-500 hover:text-slate-300 opacity-80 hover:opacity-100" href="#" id="feedback-link">Feedback</a>
+</div>
+</footer>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script>
+// ========== TOAST ==========
+function showToast(msg, icon = 'check_circle') {
+    const t = document.getElementById('toast');
+    t.innerHTML = `<span class="material-symbols-outlined toast-icon" style="font-variation-settings:'FILL' 1;">${icon}</span>${msg}`;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ========== CONFETTI ==========
+function launchConfetti() {
+    const colors = ['#10B981', '#34d399', '#6ee7b7', '#fbbf24', '#f472b6', '#818cf8'];
+    for (let i = 0; i < 40; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti';
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        el.style.width = (Math.random() * 8 + 4) + 'px';
+        el.style.height = (Math.random() * 8 + 4) + 'px';
+        el.style.animation = `confettiDrop ${Math.random() * 2 + 2}s ease-in ${Math.random() * 0.5}s forwards`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+    }
+}
+
+// Launch confetti on page load
+setTimeout(launchConfetti, 400);
+
+// ========== COPY LINK ==========
+document.getElementById('copy-link-btn').addEventListener('click', () => {
+    const url = document.getElementById('site-url').textContent;
+    navigator.clipboard.writeText(url).then(() => {
+        showToast('Link copied to clipboard!', 'content_copy');
+        document.getElementById('copy-link-btn').innerHTML = `<span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">check</span> Copied!`;
+        setTimeout(() => {
+            document.getElementById('copy-link-btn').innerHTML = `<span class="material-symbols-outlined text-sm">content_copy</span> Copy Link`;
+        }, 2000);
+    });
+});
+
+// ========== CLOSE MODAL ==========
+document.getElementById('close-modal-btn').addEventListener('click', () => {
+    document.getElementById('success-overlay').style.opacity = '0';
+    document.getElementById('success-overlay').style.pointerEvents = 'none';
+    document.getElementById('success-overlay').style.transition = 'opacity 0.3s ease';
+    showToast('You can reopen this from the dashboard', 'info');
+});
+
+// ========== SHARE BUTTONS ==========
+document.getElementById('share-twitter').addEventListener('click', () => {
+    const url = encodeURIComponent(document.getElementById('site-url').textContent);
+    window.open(`https://twitter.com/intent/tweet?text=Check%20out%20my%20new%20website%20built%20with%20Ez%20Dd!&url=${url}`, '_blank');
+});
+
+document.getElementById('share-email').addEventListener('click', () => {
+    const url = document.getElementById('site-url').textContent;
+    window.location.href = `mailto:?subject=Check out my website!&body=I just published a website with Ez Dd: ${url}`;
+});
+
+document.getElementById('share-link').addEventListener('click', () => {
+    const url = document.getElementById('site-url').textContent;
+    navigator.clipboard.writeText(url).then(() => showToast('Link copied!', 'link'));
+});
+
+// ========== SIDEBAR COMPONENTS ==========
+document.querySelectorAll('.sidebar-comp').forEach(comp => {
+    comp.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar-comp').forEach(c => {
+            c.classList.remove('text-emerald-400', 'bg-emerald-500/10', 'border-r-2', 'border-emerald-500');
+            c.classList.add('text-slate-500');
+        });
+        comp.classList.add('text-emerald-400', 'bg-emerald-500/10', 'border-r-2', 'border-emerald-500');
+        comp.classList.remove('text-slate-500');
+        showToast('Component: ' + comp.dataset.comp, 'widgets');
+    });
+});
+
+// Settings button
+document.getElementById('settings-btn').addEventListener('click', () => {
+    showToast('Settings panel coming soon', 'settings');
+});
+
+// ========== PROPERTY TABS ==========
+document.querySelectorAll('.prop-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.prop-tab').forEach(t => {
+            t.classList.remove('text-emerald-400', 'border-b-2', 'border-emerald-500');
+            t.classList.add('text-slate-400', 'border-b', 'border-slate-800');
+        });
+        tab.classList.add('text-emerald-400', 'border-b-2', 'border-emerald-500');
+        tab.classList.remove('text-slate-400', 'border-b', 'border-slate-800');
+        document.querySelectorAll('.prop-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById('ptab-' + tab.dataset.tab).classList.remove('hidden');
+    });
+});
+
+// ========== HELP ==========
+document.getElementById('help-btn').addEventListener('click', () => {
+    showToast('Help: Check our docs at docs.ezdd.app', 'help');
+});
+
+// ========== FOOTER ==========
+document.getElementById('docs-link').addEventListener('click', (e) => {
+    e.preventDefault(); showToast('Documentation coming soon', 'description');
+});
+document.getElementById('feedback-link').addEventListener('click', (e) => {
+    e.preventDefault(); showToast('Feedback form coming soon', 'feedback');
+});
+
+// ========== KEYBOARD ==========
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.getElementById('close-modal-btn').click();
+    }
+});
+</script>
+</body></html>

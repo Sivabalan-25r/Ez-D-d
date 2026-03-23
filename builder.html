@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ez D&amp;d Builder | Emerald &amp; Slate</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#10B981",
+                "primary-container": "#064e3b",
+                "on-primary": "#ffffff",
+                "surface": "#0f172a",
+                "surface-container": "#1e293b",
+                "surface-container-high": "#334155",
+                "surface-container-low": "#1e293b",
+                "surface-container-lowest": "#020617",
+                "on-surface": "#f8fafc",
+                "on-surface-variant": "#94a3b8",
+                "outline": "#475569",
+                "outline-variant": "#334155",
+                "background": "#020617"
+              },
+              fontFamily: {
+                "headline": ["Inter"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+        }
+        .bg-grid-slate {
+            background-size: 32px 32px;
+            background-image: radial-gradient(circle, #334155 1px, transparent 1px);
+        }
+        .canvas-shadow {
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 20px 50px -12px rgba(0,0,0,0.5);
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+        .toast {
+            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: #1e293b; color: #f8fafc; padding: 10px 20px; border-radius: 10px;
+            font-size: 12px; font-weight: 600; z-index: 9999; opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(16,185,129,0.3); box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast .toast-icon { color: #10B981; margin-right: 6px; vertical-align: middle; font-size: 16px; }
+
+        /* Export Modal */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(2,6,23,0.85); backdrop-filter: blur(8px);
+            z-index: 100; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-box {
+            background: #0f172a; border: 1px solid #334155; border-radius: 12px;
+            max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;
+            transform: scale(0.95); transition: transform 0.3s ease;
+            box-shadow: 0 32px 64px rgba(0,0,0,0.5);
+        }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+
+        /* Canvas element hover  */
+        .builder-element { 
+            border: 2px solid transparent; 
+            transition: border-color 0.15s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+            cursor: pointer; 
+            position: relative; 
+            user-select: none;
+        }
+        .builder-element:hover { border-color: rgba(16,185,129,0.3); }
+        .builder-element.selected { border-color: #10B981; z-index: 10; }
+        .builder-element.multi-selected { border-color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
+        .builder-element.dragging { opacity: 0.5; transform: scale(0.98); }
+
+        .builder-element .el-label {
+            position: absolute; top: -10px; left: 8px; background: #10B981;
+            color: #020617; font-size: 8px; padding: 2px 6px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.15em; border-radius: 3px;
+            opacity: 0; transition: opacity 0.15s; pointer-events: none;
+        }
+        .builder-element.multi-selected .el-label { background: #3b82f6; color: white; }
+        .builder-element:hover .el-label, .builder-element.selected .el-label { opacity: 1; }
+
+        /* Action Bar */
+        .el-actions {
+            position: absolute; top: -32px; right: 0; background: #10B981;
+            display: flex; gap: 4px; padding: 4px; border-radius: 4px 4px 0 0;
+            opacity: 0; pointer-events: none; transition: opacity 0.15s;
+        }
+        .builder-element.selected .el-actions { opacity: 1; pointer-events: all; }
+        .action-btn { 
+            color: #020617; width: 20px; height: 20px; display: flex; 
+            align-items: center; justify-content: center; border-radius: 2px;
+            transition: background 0.2s;
+        }
+        .action-btn:hover { background: rgba(2, 6, 23, 0.15); }
+
+        /* Resize Handle */
+        .resize-handle {
+            position: absolute; bottom: -5px; right: -5px; width: 10px; height: 10px;
+            background: #10B981; border: 2px solid #020617; border-radius: 50%;
+            cursor: nwse-resize; opacity: 0; pointer-events: none;
+        }
+        .builder-element.selected .resize-handle { opacity: 1; pointer-events: all; }
+
+        /* Snap Grid Visual */
+        #canvas-frame.show-grid { background-image: linear-gradient(#f1f5f9 1px, transparent 1px), linear-gradient(90deg, #f1f5f9 1px, transparent 1px); background-size: 32px 32px; }
+
+        /* Animations */
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slide-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoom-in { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+
+        .anim-fade-in { animation: fade-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .anim-slide-up { animation: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .anim-zoom-in { animation: zoom-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        /* Responsive Visibility (Simulated in Builder) */
+        .device-mobile .hidden-mobile { opacity: 0.2; pointer-events: none; filter: grayscale(1); }
+        .device-tablet .hidden-tablet { opacity: 0.2; pointer-events: none; filter: grayscale(1); }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface overflow-hidden">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/50 flex justify-between items-center px-6 h-14">
+<div class="flex items-center gap-10">
+<a href="index.html" class="text-sm font-bold tracking-[0.2em] uppercase text-emerald-500 hover:text-emerald-400 transition-colors">Ez D&amp;d Builder</a>
+<!-- Toolbar Extras -->
+<div class="flex items-center gap-1 px-1 h-8 bg-slate-900 rounded-md border border-slate-800">
+<button id="undo-btn" class="p-1.5 text-slate-500 hover:text-emerald-400 transition-colors" title="Undo (Ctrl+Z)">
+<span class="material-symbols-outlined !text-[18px]">undo</span>
+</button>
+<button id="redo-btn" class="p-1.5 text-slate-500 hover:text-emerald-400 transition-colors" title="Redo (Ctrl+Y)">
+<span class="material-symbols-outlined !text-[18px]">redo</span>
+</button>
+<div class="w-[1px] h-4 bg-slate-800 mx-1"></div>
+<button id="device-desktop" class="p-1.5 text-emerald-500 bg-slate-800 rounded-sm device-btn" title="Desktop View">
+<span class="material-symbols-outlined !text-[18px]">desktop_windows</span>
+</button>
+<button id="device-tablet" class="p-1.5 text-slate-500 hover:text-emerald-400 transition-colors device-btn" title="Tablet View">
+<span class="material-symbols-outlined !text-[18px]">tablet_mac</span>
+</button>
+<button id="device-mobile" class="p-1.5 text-slate-500 hover:text-emerald-400 transition-colors device-btn" title="Mobile View">
+<span class="material-symbols-outlined !text-[18px]">smartphone</span>
+</button>
+</div>
+</div>
+<nav class="flex items-center gap-6">
+<div class="hidden md:flex gap-8 font-inter tracking-tight text-[11px] uppercase font-semibold">
+<a class="text-slate-500 hover:text-slate-100 transition-colors" href="index.html">Preview</a>
+<a class="text-slate-500 hover:text-slate-100 transition-colors" href="success.html" id="publish-btn">Publish</a>
+<button class="text-slate-500 hover:text-slate-100 transition-colors" id="export-btn">Export</button>
+</div>
+<div class="flex items-center gap-3 ml-4">
+<a href="dashboard.html" class="w-7 h-7 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors">
+<span class="material-symbols-outlined !text-[16px]">person</span>
+</a>
+</div>
+</nav>
+</header>
+<div class="flex h-screen pt-14" id="builder-layout">
+<!-- SideNavBar (Left Components Panel) -->
+<!-- SideNavBar (Left Components Panel) -->
+<aside class="fixed left-0 top-14 h-[calc(100vh-56px)] w-60 z-40 bg-slate-950 border-r border-slate-800/60 flex flex-col" id="left-panel">
+<div class="p-4 border-b border-slate-800/40">
+<h2 class="text-[10px] uppercase tracking-[0.25em] text-slate-500 font-bold mb-1">Component Library</h2>
+<p class="text-[10px] text-slate-600 font-medium">Click to add to canvas</p>
+<div class="relative mt-3">
+<input type="text" placeholder="Search components..." id="comp-search" class="w-full h-7 pl-7 pr-2 bg-slate-900 border border-slate-800 rounded-sm text-[10px] text-slate-300 focus:border-emerald-500/50 focus:outline-none placeholder:text-slate-600">
+<span class="material-symbols-outlined absolute left-1.5 top-1 text-slate-600 !text-[16px]">search</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-3 space-y-1" id="comp-panel">
+<!-- LAYOUT -->
+<div class="comp-group" data-group="layout">
+<div class="comp-header flex items-center justify-between p-2 rounded-sm cursor-pointer hover:bg-slate-900 transition-colors" data-toggle="layout">
+<div class="flex items-center gap-2"><span class="material-symbols-outlined text-emerald-400 !text-[16px]">grid_view</span><span class="text-[10px] uppercase tracking-[0.2em] text-emerald-400 font-bold">Layout</span></div>
+<span class="material-symbols-outlined text-slate-600 !text-[14px] toggle-arrow">expand_less</span>
+</div>
+<div class="comp-items pl-2 space-y-0.5 mt-1">
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="section"><span class="material-symbols-outlined !text-[16px]">view_agenda</span><span class="text-[10px] font-semibold">Section</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="container"><span class="material-symbols-outlined !text-[16px]">crop_free</span><span class="text-[10px] font-semibold">Container</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="grid2"><span class="material-symbols-outlined !text-[16px]">grid_on</span><span class="text-[10px] font-semibold">2 Columns</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="grid3"><span class="material-symbols-outlined !text-[16px]">view_column</span><span class="text-[10px] font-semibold">3 Columns</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="grid4"><span class="material-symbols-outlined !text-[16px]">grid_view</span><span class="text-[10px] font-semibold">4 Columns</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="spacer"><span class="material-symbols-outlined !text-[16px]">unfold_more</span><span class="text-[10px] font-semibold">Spacer</span></div>
+</div>
+</div>
+<!-- TYPOGRAPHY -->
+<div class="comp-group" data-group="typography">
+<div class="comp-header flex items-center justify-between p-2 rounded-sm cursor-pointer hover:bg-slate-900 transition-colors" data-toggle="typography">
+<div class="flex items-center gap-2"><span class="material-symbols-outlined text-slate-500 !text-[16px]">text_fields</span><span class="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold">Typography</span></div>
+<span class="material-symbols-outlined text-slate-600 !text-[14px] toggle-arrow">expand_more</span>
+</div>
+<div class="comp-items pl-2 space-y-0.5 mt-1 hidden">
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="h1"><span class="material-symbols-outlined !text-[16px]">format_h1</span><span class="text-[10px] font-semibold">Heading H1</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="h2"><span class="material-symbols-outlined !text-[16px]">format_h2</span><span class="text-[10px] font-semibold">Heading H2</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="h3"><span class="material-symbols-outlined !text-[16px]">format_h3</span><span class="text-[10px] font-semibold">Heading H3</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="paragraph"><span class="material-symbols-outlined !text-[16px]">notes</span><span class="text-[10px] font-semibold">Paragraph</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="quote"><span class="material-symbols-outlined !text-[16px]">format_quote</span><span class="text-[10px] font-semibold">Quote / Highlight</span></div>
+</div>
+</div>
+<!-- MEDIA -->
+<div class="comp-group" data-group="media">
+<div class="comp-header flex items-center justify-between p-2 rounded-sm cursor-pointer hover:bg-slate-900 transition-colors" data-toggle="media">
+<div class="flex items-center gap-2"><span class="material-symbols-outlined text-slate-500 !text-[16px]">filter_hdr</span><span class="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold">Media</span></div>
+<span class="material-symbols-outlined text-slate-600 !text-[14px] toggle-arrow">expand_more</span>
+</div>
+<div class="comp-items pl-2 space-y-0.5 mt-1 hidden">
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="image"><span class="material-symbols-outlined !text-[16px]">image</span><span class="text-[10px] font-semibold">Image Upload</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="video"><span class="material-symbols-outlined !text-[16px]">play_circle</span><span class="text-[10px] font-semibold">Video Embed</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="icon"><span class="material-symbols-outlined !text-[16px]">emoji_symbols</span><span class="text-[10px] font-semibold">Icon</span></div>
+</div>
+</div>
+<!-- INPUT / FORMS -->
+<div class="comp-group" data-group="input">
+<div class="comp-header flex items-center justify-between p-2 rounded-sm cursor-pointer hover:bg-slate-900 transition-colors" data-toggle="input">
+<div class="flex items-center gap-2"><span class="material-symbols-outlined text-slate-500 !text-[16px]">rebase_edit</span><span class="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold">Input / Forms</span></div>
+<span class="material-symbols-outlined text-slate-600 !text-[14px] toggle-arrow">expand_more</span>
+</div>
+<div class="comp-items pl-2 space-y-0.5 mt-1 hidden">
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="textinput"><span class="material-symbols-outlined !text-[16px]">edit_note</span><span class="text-[10px] font-semibold">Text Input</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="emailfield"><span class="material-symbols-outlined !text-[16px]">alternate_email</span><span class="text-[10px] font-semibold">Email Field</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="passwordfield"><span class="material-symbols-outlined !text-[16px]">password</span><span class="text-[10px] font-semibold">Password Field</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="checkbox"><span class="material-symbols-outlined !text-[16px]">check_box</span><span class="text-[10px] font-semibold">Checkbox / Radio</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="submitbtn"><span class="material-symbols-outlined !text-[16px]">send</span><span class="text-[10px] font-semibold">Submit Button</span></div>
+</div>
+</div>
+<!-- BASIC COMPONENTS -->
+<div class="comp-group" data-group="basic">
+<div class="comp-header flex items-center justify-between p-2 rounded-sm cursor-pointer hover:bg-slate-900 transition-colors" data-toggle="basic">
+<div class="flex items-center gap-2"><span class="material-symbols-outlined text-slate-500 !text-[16px]">widgets</span><span class="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold">Basic Components</span></div>
+<span class="material-symbols-outlined text-slate-600 !text-[14px] toggle-arrow">expand_more</span>
+</div>
+<div class="comp-items pl-2 space-y-0.5 mt-1 hidden">
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="button"><span class="material-symbols-outlined !text-[16px]">rectangle</span><span class="text-[10px] font-semibold">Button</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="card"><span class="material-symbols-outlined !text-[16px]">crop_portrait</span><span class="text-[10px] font-semibold">Card</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="navbar"><span class="material-symbols-outlined !text-[16px]">web</span><span class="text-[10px] font-semibold">Navbar</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="footercomp"><span class="material-symbols-outlined !text-[16px]">call_to_action</span><span class="text-[10px] font-semibold">Footer</span></div>
+<div class="comp-item flex items-center gap-2.5 p-2 rounded-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95" data-type="divider"><span class="material-symbols-outlined !text-[16px]">horizontal_rule</span><span class="text-[10px] font-semibold">Divider Line</span></div>
+</div>
+</div>
+</div>
+<div class="p-3 bg-slate-950 border-t border-slate-800/60 space-y-2">
+<button id="construct-btn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-sm text-[10px] uppercase tracking-[0.2em] font-bold transition-colors flex items-center justify-center gap-2 active:scale-95">
+<span class="material-symbols-outlined !text-[16px]">add</span><span>Construct</span>
+</button>
+<div id="config-btn" class="flex items-center gap-3 px-2 py-1 text-slate-500 hover:text-slate-200 cursor-pointer transition-all active:scale-95 rounded-sm hover:bg-slate-900">
+<span class="material-symbols-outlined !text-[18px]">tune</span><span class="text-[10px] uppercase tracking-[0.2em] font-bold">Config</span>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="flex-1 ml-60 mr-72 bg-slate-900 bg-grid-slate flex items-center justify-center relative overflow-y-auto p-12 device-desktop" id="canvas-area">
+<!-- Website Canvas Container -->
+<section class="canvas-frame w-full max-w-4xl bg-white shadow-2xl rounded-sm min-h-[700px] flex flex-col relative overflow-hidden text-slate-950" id="canvas-frame">
+<div id="canvas-elements-container" class="flex-1 flex flex-col">
+<!-- Hero Section (Selected State) -->
+<div class="builder-element selected flex-1 flex flex-col items-center justify-center text-center p-24 relative" id="hero-module">
+<div class="el-label">Module: Hero Entry</div>
+<div class="max-w-xl">
+<h1 class="text-8xl font-extrabold tracking-[-0.05em] text-slate-950 mb-8 leading-[0.85]" id="hero-heading" contenteditable="true">
+                        The New Precision.
+                    </h1>
+<p class="text-slate-500 text-lg font-normal leading-relaxed mb-12 max-w-md mx-auto" id="hero-subtext" contenteditable="true">
+                        Building the future of architectural interaction. A system designed for the minimalist visionary.
+                    </p>
+<div class="flex gap-4 justify-center">
+<button class="px-10 py-4 bg-slate-950 text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-emerald-600 transition-colors">
+                            Early Access
+                        </button>
+<button class="px-10 py-4 border border-slate-200 text-slate-950 font-bold text-xs uppercase tracking-[0.2em] hover:bg-slate-50 transition-colors">
+                            Philosophy
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- SideNavBar (Right Properties Panel) -->
+<aside class="fixed right-0 top-14 h-[calc(100vh-56px)] w-72 z-40 bg-slate-950 border-l border-slate-800/60 flex flex-col" id="right-panel">
+<div class="p-5 border-b border-slate-800/40 flex justify-between items-end">
+<div>
+<h2 class="text-[10px] uppercase tracking-[0.25em] text-slate-100 font-bold">Inspector</h2>
+<p class="text-[10px] text-slate-600 font-medium mt-0.5" id="inspector-target">Edit node properties</p>
+</div>
+<button id="delete-selected-btn" class="material-symbols-outlined text-slate-700 hover:text-red-400 !text-[18px] transition-colors cursor-pointer" title="Delete Selected">delete</button>
+</div>
+        <!-- Tabs -->
+        <div class="flex border-b border-slate-800/40" id="inspector-tabs">
+            <div class="flex-1 py-3 text-[10px] uppercase tracking-[0.2em] text-emerald-400 font-bold border-b-2 border-emerald-500 text-center cursor-pointer inspector-tab active" data-tab="design">Design</div>
+            <div class="flex-1 py-3 text-[10px] uppercase tracking-[0.2em] text-slate-600 hover:text-slate-400 font-bold text-center cursor-pointer transition-colors inspector-tab" data-tab="layout">Layout</div>
+            <div class="flex-1 py-3 text-[10px] uppercase tracking-[0.2em] text-slate-600 hover:text-slate-400 font-bold text-center cursor-pointer transition-colors inspector-tab" data-tab="content">Content</div>
+            <div class="flex-1 py-3 text-[10px] uppercase tracking-[0.2em] text-slate-600 hover:text-slate-400 font-bold text-center cursor-pointer transition-colors inspector-tab" data-tab="extra">Extra</div>
+        </div>
+
+        <!-- Design Tab -->
+        <div class="flex-1 overflow-y-auto p-5 space-y-8 inspector-content" id="tab-design">
+            <!-- Typography -->
+            <section>
+                <div class="flex items-center justify-between mb-4 cursor-pointer" id="typo-toggle">
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Typography</span>
+                    <span class="material-symbols-outlined text-slate-600 !text-[16px] toggle-icon">expand_more</span>
+                </div>
+                <div class="space-y-4" id="typo-content">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-[9px] uppercase font-bold text-slate-600 tracking-wider">Size</label>
+                            <input type="number" id="font-size-input" class="w-full h-9 bg-slate-900 border border-slate-800 rounded px-2 text-[11px] text-slate-300 focus:border-emerald-500/50 outline-none">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] uppercase font-bold text-slate-600 tracking-wider">Weight</label>
+                            <select id="font-weight-select" class="w-full h-9 bg-slate-900 border border-slate-800 rounded px-2 text-[11px] text-slate-300 focus:border-emerald-500/50 outline-none cursor-pointer">
+                                <option value="300">300 (Light)</option>
+                                <option value="400">400 (Regular)</option>
+                                <option value="600">600 (Bold)</option>
+                                <option value="800">800 (Black)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex bg-slate-900 p-1 rounded border border-slate-800">
+                        <button class="flex-1 py-1.5 align-btn active" data-align="left"><span class="material-symbols-outlined !text-[16px]">format_align_left</span></button>
+                        <button class="flex-1 py-1.5 align-btn" data-align="center"><span class="material-symbols-outlined !text-[16px]">format_align_center</span></button>
+                        <button class="flex-1 py-1.5 align-btn" data-align="right"><span class="material-symbols-outlined !text-[16px]">format_align_right</span></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Colors -->
+            <section>
+                <div class="flex items-center justify-between mb-4 cursor-pointer" id="color-toggle">
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Atmosphere</span>
+                    <span class="material-symbols-outlined text-slate-600 !text-[16px]">palette</span>
+                </div>
+                <div class="space-y-3" id="color-content">
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="color-primary" class="w-8 h-8 rounded border border-slate-800 bg-transparent cursor-pointer">
+                        <div class="flex-1"><label class="text-[9px] uppercase font-bold text-slate-600 block">Text</label><span id="color-primary-hex" class="text-[10px] font-mono text-slate-400">#FFFFFF</span></div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="color-bg" class="w-8 h-8 rounded border border-slate-800 bg-transparent cursor-pointer">
+                        <div class="flex-1"><label class="text-[9px] uppercase font-bold text-slate-600 block">Background</label><span id="color-bg-hex" class="text-[10px] font-mono text-slate-400">#000000</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Geometry -->
+            <section>
+                <div class="flex items-center justify-between mb-4 cursor-pointer" id="geo-toggle">
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Geometry</span>
+                    <span class="material-symbols-outlined text-slate-600 !text-[16px]">square_foot</span>
+                </div>
+                <div class="space-y-4" id="geo-content">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-[9px] uppercase font-bold text-slate-600">Padding</label>
+                            <input type="number" id="padding-input" class="w-full h-8 bg-slate-900 border border-slate-800 rounded px-2 text-[10px] text-slate-300">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] uppercase font-bold text-slate-600">Margin</label>
+                            <input type="number" id="margin-input" class="w-full h-8 bg-slate-900 border border-slate-800 rounded px-2 text-[10px] text-slate-300">
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[9px] uppercase font-bold text-slate-600">Border Radius</label>
+                        <input type="range" id="radius-slider" min="0" max="100" class="w-full accent-emerald-500">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[9px] uppercase font-bold text-slate-600">Opacity</label>
+                        <input type="range" id="opacity-slider" min="0" max="100" value="100" class="w-full accent-emerald-500">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Effects -->
+            <section>
+                <div class="flex items-center justify-between mb-4 cursor-pointer" id="effects-toggle">
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Effects</span>
+                    <span class="material-symbols-outlined text-slate-600 !text-[16px]">filter_vintage</span>
+                </div>
+                <div class="space-y-3" id="effects-content">
+                    <div class="space-y-1">
+                        <label class="text-[9px] uppercase font-bold text-slate-600">Shadow</label>
+                        <select id="shadow-select" class="w-full h-9 bg-slate-900 border border-slate-800 rounded px-2 text-[11px] text-slate-300 outline-none">
+                            <option value="none">None</option>
+                            <option value="0 4px 6px -1px rgb(0 0 0 / 0.1)">Soft</option>
+                            <option value="0 10px 15px -3px rgb(0 0 0 / 0.1)">Medium</option>
+                            <option value="0 20px 25px -5px rgb(0 0 0 / 0.1)">Hard</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Layout Tab -->
+        <div class="flex-1 overflow-y-auto p-5 space-y-8 inspector-content hidden" id="tab-layout">
+            <section>
+                <div class="flex items-center justify-between mb-4 cursor-pointer">
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Flexbox</span>
+                    <span class="material-symbols-outlined text-emerald-500 !text-[16px]">reorder</span>
+                </div>
+                <div class="space-y-4">
+                    <div class="space-y-1">
+                        <label class="text-[9px] uppercase font-bold text-slate-600">Direction</label>
+                        <div class="flex bg-slate-900 p-1 rounded border border-slate-800">
+                            <button class="flex-1 py-1 text-[10px] font-bold layout-btn active" data-prop="flexDirection" data-val="row">Row</button>
+                            <button class="flex-1 py-1 text-[10px] font-bold layout-btn" data-prop="flexDirection" data-val="column">Col</button>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] uppercase font-bold text-slate-600">Align</label>
+                        <div class="flex bg-slate-900 p-1 rounded border border-slate-800">
+                            <button class="flex-1 py-1 layout-btn" data-prop="alignItems" data-val="flex-start"><span class="material-symbols-outlined !text-[14px]">align_start</span></button>
+                            <button class="flex-1 py-1 layout-btn active" data-prop="alignItems" data-val="center"><span class="material-symbols-outlined !text-[14px]">align_center</span></button>
+                            <button class="flex-1 py-1 layout-btn" data-prop="alignItems" data-val="flex-end"><span class="material-symbols-outlined !text-[14px]">align_end</span></button>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] uppercase font-bold text-slate-600">Justify</label>
+                        <div class="flex bg-slate-900 p-1 rounded border border-slate-800">
+                            <button class="flex-1 py-1 layout-btn" data-prop="justifyContent" data-val="flex-start"><span class="material-symbols-outlined !text-[14px]">format_align_left</span></button>
+                            <button class="flex-1 py-1 layout-btn active" data-prop="justifyContent" data-val="center"><span class="material-symbols-outlined !text-[14px]">format_align_center</span></button>
+                            <button class="flex-1 py-1 layout-btn" data-prop="justifyContent" data-val="space-between"><span class="material-symbols-outlined !text-[14px]">format_align_right</span></button>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] uppercase font-bold text-slate-600">Gap (px)</label>
+                        <input type="number" id="gap-input" class="w-full h-9 bg-slate-900 border border-slate-800 rounded px-3 text-[11px] text-slate-300">
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Content Tab -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6 inspector-content hidden" id="tab-content">
+            <div id="content-fields-container" class="space-y-6">
+                <!-- Dynamic Fields Based on Selection -->
+                <div class="space-y-2">
+                    <label class="text-[9px] uppercase font-bold text-slate-600 tracking-wider">Main Text / Heading</label>
+                    <textarea id="content-main" class="w-full bg-slate-900 border border-slate-800 rounded p-3 text-[11px] text-slate-300 outline-none resize-none h-24"></textarea>
+                </div>
+                <div class="space-y-2" id="img-field" style="display:none">
+                    <label class="text-[9px] uppercase font-bold text-slate-600 tracking-wider">Image Source URL</label>
+                    <input type="text" id="content-img-url" class="w-full h-9 bg-slate-900 border border-slate-800 rounded px-3 text-[11px] text-slate-300">
+                </div>
+                <div class="space-y-2" id="link-field" style="display:none">
+                    <label class="text-[9px] uppercase font-bold text-slate-600 tracking-wider">Button Link (HREF)</label>
+                    <input type="text" id="content-link-url" class="w-full h-9 bg-slate-900 border border-slate-800 rounded px-3 text-[11px] text-slate-300">
+                </div>
+                <div class="space-y-2" id="placeholder-field" style="display:none">
+                    <label class="text-[9px] uppercase font-bold text-slate-600 tracking-wider">Placeholder Text</label>
+                    <input type="text" id="content-placeholder" class="w-full h-9 bg-slate-900 border border-slate-800 rounded px-3 text-[11px] text-slate-300">
+                </div>
+            </div>
+            <button id="apply-content-btn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-sm text-[10px] uppercase tracking-[0.2em] font-bold transition-all active:scale-95 shadow-lg shadow-emerald-500/10">Apply Changes</button>
+        </div>
+
+        <!-- Extra Tab (Advanced) -->
+        <div class="flex-1 overflow-y-auto p-5 space-y-8 inspector-content hidden" id="tab-extra">
+            <section>
+                <div class="flex items-center justify-between mb-4 cursor-pointer">
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Animations</span>
+                    <span class="material-symbols-outlined text-slate-600 !text-[16px]">auto_awesome</span>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[9px] uppercase font-bold text-slate-600">Entrance</label>
+                    <select id="anim-select" class="w-full h-9 bg-slate-900 border border-slate-800 rounded px-2 text-[11px] text-slate-300 outline-none">
+                        <option value="none">None</option>
+                        <option value="fade-in">Fade In</option>
+                        <option value="slide-up">Slide Up</option>
+                        <option value="zoom-in">Zoom In</option>
+                    </select>
+                </div>
+            </section>
+            <section>
+                <div class="flex items-center justify-between mb-4 cursor-pointer">
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Responsiveness</span>
+                    <span class="material-symbols-outlined text-slate-600 !text-[16px]">devices</span>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between p-2 bg-slate-900 rounded border border-slate-800">
+                        <span class="text-[10px] text-slate-400">Hide on Mobile</span>
+                        <input type="checkbox" class="accent-emerald-500 hide-check" data-device="mobile">
+                    </div>
+                    <div class="flex items-center justify-between p-2 bg-slate-900 rounded border border-slate-800">
+                        <span class="text-[10px] text-slate-400">Hide on Tablet</span>
+                        <input type="checkbox" class="accent-emerald-500 hide-check" data-device="tablet">
+                    </div>
+                </div>
+            </section>
+        </div>
+</aside>
+<!-- Global Footer -->
+<footer class="fixed bottom-0 w-full h-7 z-50 bg-slate-950 border-t border-slate-800/60 flex items-center justify-between px-6">
+<div class="flex items-center gap-3">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" id="sync-dot"></span>
+<span class="text-[9px] uppercase tracking-widest text-slate-500 font-bold" id="sync-status">Node Engine: Syncing</span>
+</div>
+<div class="flex gap-6 items-center">
+<span class="text-[9px] font-mono text-slate-700 uppercase">Build 10.4.0</span>
+<div class="flex gap-4">
+<a class="text-[9px] uppercase tracking-widest text-slate-500 hover:text-emerald-400 transition-colors font-bold" href="#" id="docs-link">Docs</a>
+<a class="text-[9px] uppercase tracking-widest text-slate-500 hover:text-emerald-400 transition-colors font-bold" href="#" id="support-link">Support</a>
+</div>
+</div>
+</footer>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-overlay" id="export-modal">
+<div class="modal-box">
+<div class="p-6">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-lg font-bold text-slate-100">Export Code</h2>
+<button id="close-export" class="text-slate-500 hover:text-slate-300 transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex gap-2 mb-4">
+<button class="export-type-btn px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-sm text-[10px] uppercase tracking-widest font-bold" data-type="html">HTML</button>
+<button class="export-type-btn px-4 py-2 bg-slate-900 text-slate-400 border border-slate-800 rounded-sm text-[10px] uppercase tracking-widest font-bold" data-type="react">React</button>
+<button class="export-type-btn px-4 py-2 bg-slate-900 text-slate-400 border border-slate-800 rounded-sm text-[10px] uppercase tracking-widest font-bold" data-type="json">JSON</button>
+</div>
+<pre class="bg-slate-900 border border-slate-800 rounded-sm p-4 text-[11px] text-emerald-300 font-mono overflow-auto max-h-[300px] whitespace-pre-wrap" id="export-code"></pre>
+<button class="w-full mt-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-sm text-[10px] uppercase tracking-[0.2em] font-bold transition-colors flex items-center justify-center gap-2 active:scale-95" id="copy-export-btn">
+<span class="material-symbols-outlined !text-[16px]">content_copy</span>
+Copy to Clipboard
+</button>
+</div>
+</div>
+</div>
+
+<!-- Config Modal -->
+<div class="modal-overlay" id="config-modal">
+<div class="modal-box" style="max-width:450px;">
+<div class="p-6">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-lg font-bold text-slate-100">Project Config</h2>
+<button id="close-config" class="text-slate-500 hover:text-slate-300 transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="space-y-4">
+<div class="space-y-1.5">
+<label class="text-[9px] uppercase font-bold text-slate-600 tracking-wider">Project Name</label>
+<input type="text" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-sm px-3 text-[11px] text-slate-300 focus:border-emerald-500/50 focus:outline-none" id="project-name" value="My Website">
+</div>
+<div class="space-y-1.5">
+<label class="text-[9px] uppercase font-bold text-slate-600 tracking-wider">Canvas Background</label>
+<input type="color" value="#ffffff" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-sm cursor-pointer" id="canvas-bg-color">
+</div>
+<div class="space-y-1.5">
+<label class="text-[9px] uppercase font-bold text-slate-600 tracking-wider">Grid Visibility</label>
+<div class="flex items-center gap-3">
+<input type="checkbox" checked class="accent-emerald-500" id="grid-toggle">
+<span class="text-[10px] text-slate-400">Show background grid</span>
+</div>
+</div>
+<button class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-sm text-[10px] uppercase tracking-[0.2em] font-bold transition-colors active:scale-95" id="save-config-btn">Save Configuration</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script>
+// ========== TOAST ==========
+function showToast(msg, icon = 'check_circle') {
+    const t = document.getElementById('toast');
+    t.innerHTML = `<span class="material-symbols-outlined toast-icon" style="font-variation-settings:'FILL' 1;">${icon}</span>${msg}`;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ========== MODAL HELPERS ==========
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ========== BUILDER STATE ==========
+let elements = [];
+let undoStack = [];
+let redoStack = [];
+let selectedIndices = [0];
+let draggedIdx = null;
+let elCounter = 0;
+
+function getElementTemplates() {
+    return {
+        // ===== LAYOUT =====
+        section: `<div style="padding:40px;background:#f8fafc;border:1px dashed #e2e8f0;border-radius:4px;text-align:center;min-height:80px;"><p style="color:#94a3b8;font-size:12px;margin:0;">Full Width Section — Click to edit</p></div>`,
+
+        container: `<div style="padding:32px;max-width:960px;margin:0 auto;background:#ffffff;border:1px dashed #e2e8f0;border-radius:8px;text-align:center;min-height:60px;"><p style="color:#94a3b8;font-size:12px;margin:0;">Boxed Container (960px max)</p></div>`,
+
+        grid2: `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;"><div style="background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:6px;padding:24px;text-align:center;min-height:80px;"><p style="color:#94a3b8;font-size:11px;margin:0;">Column 1</p></div><div style="background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:6px;padding:24px;text-align:center;min-height:80px;"><p style="color:#94a3b8;font-size:11px;margin:0;">Column 2</p></div></div>`,
+
+        grid3: `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;padding:16px;"><div style="background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:6px;padding:24px;text-align:center;min-height:80px;"><p style="color:#94a3b8;font-size:11px;margin:0;">Col 1</p></div><div style="background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:6px;padding:24px;text-align:center;min-height:80px;"><p style="color:#94a3b8;font-size:11px;margin:0;">Col 2</p></div><div style="background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:6px;padding:24px;text-align:center;min-height:80px;"><p style="color:#94a3b8;font-size:11px;margin:0;">Col 3</p></div></div>`,
+
+        grid4: `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;padding:16px;"><div style="background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:6px;padding:20px;text-align:center;min-height:60px;"><p style="color:#94a3b8;font-size:10px;margin:0;">1</p></div><div style="background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:6px;padding:20px;text-align:center;min-height:60px;"><p style="color:#94a3b8;font-size:10px;margin:0;">2</p></div><div style="background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:6px;padding:20px;text-align:center;min-height:60px;"><p style="color:#94a3b8;font-size:10px;margin:0;">3</p></div><div style="background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:6px;padding:20px;text-align:center;min-height:60px;"><p style="color:#94a3b8;font-size:10px;margin:0;">4</p></div></div>`,
+
+        spacer: `<div style="padding:0 16px;"><div style="height:48px;background:repeating-linear-gradient(45deg,transparent,transparent 4px,#f1f5f9 4px,#f1f5f9 8px);border-radius:4px;display:flex;align-items:center;justify-content:center;"><span style="color:#cbd5e1;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;">↕ Spacer 48px</span></div></div>`,
+
+        // ===== TYPOGRAPHY =====
+        h1: `<h1 style="font-size:48px;font-weight:800;color:#0f172a;padding:16px 24px;letter-spacing:-0.03em;line-height:1.1;margin:0;" contenteditable="true">Heading H1</h1>`,
+
+        h2: `<h2 style="font-size:36px;font-weight:700;color:#0f172a;padding:12px 24px;letter-spacing:-0.02em;line-height:1.2;margin:0;" contenteditable="true">Heading H2</h2>`,
+
+        h3: `<h3 style="font-size:24px;font-weight:600;color:#0f172a;padding:10px 24px;letter-spacing:-0.01em;line-height:1.3;margin:0;" contenteditable="true">Heading H3</h3>`,
+
+        heading: `<h2 style="font-size:36px;font-weight:800;color:#0f172a;text-align:center;padding:16px;letter-spacing:-0.02em;margin:0;" contenteditable="true">Your Heading</h2>`,
+
+        paragraph: `<p style="font-size:16px;color:#475569;padding:12px 24px;line-height:1.7;margin:0;" contenteditable="true">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>`,
+
+        quote: `<blockquote style="padding:20px 24px;margin:16px 24px;border-left:4px solid #10b981;background:#f0fdf4;border-radius:0 8px 8px 0;"><p style="font-size:16px;font-style:italic;color:#1e293b;margin:0;line-height:1.6;" contenteditable="true">"Design is not just what it looks like and feels like. Design is how it works."</p><cite style="display:block;margin-top:8px;font-size:12px;color:#64748b;font-style:normal;">— Steve Jobs</cite></blockquote>`,
+
+        // ===== MEDIA =====
+        image: `<div style="padding:16px;text-align:center;"><div style="width:100%;height:200px;background:linear-gradient(135deg,#f1f5f9,#e2e8f0);border:2px dashed #cbd5e1;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;"><span style="font-size:32px;">📷</span><span style="color:#94a3b8;font-size:12px;font-weight:600;">Click to upload image</span><span style="color:#cbd5e1;font-size:10px;">JPG, PNG, SVG up to 5MB</span></div></div>`,
+
+        video: `<div style="padding:16px;"><div style="width:100%;aspect-ratio:16/9;background:#0f172a;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;"><div style="width:64px;height:64px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);"><span style="font-size:28px;color:white;margin-left:4px;">▶</span></div><span style="color:#94a3b8;font-size:11px;">Paste YouTube URL to embed</span><input type="text" placeholder="https://youtube.com/watch?v=..." style="margin-top:8px;width:80%;max-width:320px;padding:8px 12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:white;font-size:11px;text-align:center;outline:none;"></div></div>`,
+
+        icon: `<div style="padding:16px;text-align:center;"><div style="display:inline-flex;gap:16px;padding:16px 24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;"><span style="font-size:24px;cursor:pointer;" title="Star">⭐</span><span style="font-size:24px;cursor:pointer;" title="Heart">❤️</span><span style="font-size:24px;cursor:pointer;" title="Rocket">🚀</span><span style="font-size:24px;cursor:pointer;" title="Lightning">⚡</span><span style="font-size:24px;cursor:pointer;" title="Check">✅</span><span style="font-size:24px;cursor:pointer;" title="Fire">🔥</span></div></div>`,
+
+        // ===== INPUT / FORMS =====
+        textinput: `<div style="padding:12px 24px;max-width:400px;"><label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Text Input</label><input type="text" placeholder="Enter text here..." style="width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;color:#1f2937;outline:none;box-sizing:border-box;"></div>`,
+
+        emailfield: `<div style="padding:12px 24px;max-width:400px;"><label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Email Address</label><input type="email" placeholder="name@example.com" style="width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;color:#1f2937;outline:none;box-sizing:border-box;"></div>`,
+
+        passwordfield: `<div style="padding:12px 24px;max-width:400px;"><label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Password</label><input type="password" placeholder="••••••••" style="width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;color:#1f2937;outline:none;box-sizing:border-box;"></div>`,
+
+        checkbox: `<div style="padding:12px 24px;max-width:400px;"><fieldset style="border:none;padding:0;margin:0;"><legend style="font-size:12px;font-weight:600;color:#374151;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em;">Options</legend><label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;font-size:14px;color:#1f2937;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#10b981;"> Option A</label><label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;font-size:14px;color:#1f2937;"><input type="checkbox" style="width:16px;height:16px;accent-color:#10b981;"> Option B</label><label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;font-size:14px;color:#475569;"><input type="radio" name="radio-demo" checked style="width:16px;height:16px;accent-color:#10b981;"> Radio 1</label><label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;font-size:14px;color:#475569;"><input type="radio" name="radio-demo" style="width:16px;height:16px;accent-color:#10b981;"> Radio 2</label></fieldset></div>`,
+
+        submitbtn: `<div style="padding:12px 24px;max-width:400px;"><button style="width:100%;padding:14px;background:#10b981;color:white;font-weight:700;font-size:14px;border:none;border-radius:8px;cursor:pointer;text-transform:uppercase;letter-spacing:0.08em;">Submit</button></div>`,
+
+        form: `<div style="padding:24px;max-width:440px;margin:0 auto;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;"><h4 style="font-size:18px;font-weight:700;color:#0f172a;margin:0 0 16px;">Contact Form</h4><div style="margin-bottom:12px;"><label style="display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;text-transform:uppercase;">Name</label><input type="text" placeholder="John Doe" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;box-sizing:border-box;"></div><div style="margin-bottom:12px;"><label style="display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;text-transform:uppercase;">Email</label><input type="email" placeholder="john@example.com" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;box-sizing:border-box;"></div><div style="margin-bottom:16px;"><label style="display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;text-transform:uppercase;">Message</label><textarea placeholder="Your message..." style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;height:80px;resize:none;box-sizing:border-box;"></textarea></div><button style="width:100%;padding:12px;background:#10b981;color:white;font-weight:700;font-size:12px;border:none;border-radius:6px;cursor:pointer;text-transform:uppercase;letter-spacing:0.1em;">Send Message</button></div>`,
+
+        // ===== BASIC COMPONENTS =====
+        button: `<div style="text-align:center;padding:16px;"><button style="padding:14px 40px;background:#0f172a;color:white;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:0.12em;border:none;border-radius:8px;cursor:pointer;">Click Me</button></div>`,
+
+        card: `<div style="max-width:360px;margin:16px auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);border:1px solid #e2e8f0;"><div style="width:100%;height:180px;background:linear-gradient(135deg,#e0f2fe,#dbeafe);display:flex;align-items:center;justify-content:center;"><span style="font-size:40px;">🖼️</span></div><div style="padding:20px;"><h4 style="font-size:18px;font-weight:700;color:#0f172a;margin:0 0 8px;" contenteditable="true">Card Title</h4><p style="font-size:13px;color:#64748b;line-height:1.5;margin:0 0 16px;" contenteditable="true">Card description goes here. Click to edit this text.</p><button style="padding:8px 20px;background:#10b981;color:white;font-weight:600;font-size:11px;border:none;border-radius:6px;cursor:pointer;text-transform:uppercase;">Learn More</button></div></div>`,
+
+        navbar: `<nav style="display:flex;align-items:center;justify-content:space-between;padding:16px 32px;background:#0f172a;border-radius:8px;margin:16px;"><span style="color:white;font-size:18px;font-weight:800;letter-spacing:-0.02em;" contenteditable="true">Brand</span><div style="display:flex;gap:24px;"><a style="color:#94a3b8;font-size:13px;font-weight:500;text-decoration:none;cursor:pointer;" contenteditable="true">Home</a><a style="color:#94a3b8;font-size:13px;font-weight:500;text-decoration:none;cursor:pointer;" contenteditable="true">About</a><a style="color:#94a3b8;font-size:13px;font-weight:500;text-decoration:none;cursor:pointer;" contenteditable="true">Services</a><a style="color:#94a3b8;font-size:13px;font-weight:500;text-decoration:none;cursor:pointer;" contenteditable="true">Contact</a></div><button style="padding:8px 20px;background:#10b981;color:white;font-weight:600;font-size:11px;border:none;border-radius:6px;cursor:pointer;text-transform:uppercase;">Get Started</button></nav>`,
+
+        footercomp: `<footer style="padding:32px;background:#0f172a;border-radius:8px;margin:16px;"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px;margin-bottom:24px;"><div><h5 style="color:white;font-size:16px;font-weight:700;margin:0 0 12px;" contenteditable="true">Brand</h5><p style="color:#64748b;font-size:12px;max-width:200px;line-height:1.5;margin:0;" contenteditable="true">Building better websites with Ez D&d.</p></div><div><h6 style="color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 10px;">Links</h6><div style="display:flex;flex-direction:column;gap:6px;"><a style="color:#64748b;font-size:12px;text-decoration:none;cursor:pointer;">Home</a><a style="color:#64748b;font-size:12px;text-decoration:none;cursor:pointer;">About</a><a style="color:#64748b;font-size:12px;text-decoration:none;cursor:pointer;">Privacy</a></div></div><div><h6 style="color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 10px;">Contact</h6><div style="display:flex;flex-direction:column;gap:6px;"><span style="color:#64748b;font-size:12px;">hello@brand.com</span><span style="color:#64748b;font-size:12px;">+1 (555) 123-4567</span></div></div></div><div style="border-top:1px solid #1e293b;padding-top:16px;text-align:center;"><span style="color:#475569;font-size:11px;">© 2024 Brand. All rights reserved.</span></div></footer>`,
+
+        divider: `<div style="padding:8px 24px;"><hr style="border:none;height:2px;background:linear-gradient(90deg,transparent,#e2e8f0,transparent);margin:0;"></div>`,
+    };
+}
+
+function saveHistory() {
+    undoStack.push(JSON.stringify(elements));
+    if (undoStack.length > 40) undoStack.shift();
+    redoStack = [];
+}
+
+// Initialize with hero element
+elements = [{
+    type: 'hero',
+    html: document.getElementById('hero-module').outerHTML
+}];
+
+function renderElements() {
+    const container = document.getElementById('canvas-elements-container');
+    if (elements.length === 0) {
+        container.innerHTML = `<div class="flex-1 flex flex-col items-center justify-center text-center p-24 text-slate-400"><span class="material-symbols-outlined text-4xl mb-4 text-emerald-500/30" style="font-variation-settings:'FILL' 1;">add_circle</span><p class="text-sm">Drop components here to build</p></div>`;
+        return;
+    }
+    container.innerHTML = elements.map((el, i) => {
+        const isSelected = selectedIndices.includes(i);
+        const isMulti = selectedIndices.length > 1 && isSelected;
+        return `
+        <div class="builder-element ${isSelected ? 'selected' : ''} ${isMulti ? 'multi-selected' : ''}" 
+             data-idx="${i}" 
+             draggable="true" 
+             ondragstart="handleDragStart(event, ${i})"
+             ondragover="handleDragOver(event, ${i})"
+             ondragend="handleDragEnd(event)"
+             ondrop="handleDrop(event, ${i})"
+             onclick="selectEl(${i}, event.shiftKey)">
+            <div class="el-label">${el.type}</div>
+            <div class="el-actions">
+                <button class="action-btn" onclick="event.stopPropagation(); duplicateEl(${i})" title="Duplicate">
+                    <span class="material-symbols-outlined !text-[12px]">content_copy</span>
+                </button>
+                <button class="action-btn" onclick="event.stopPropagation(); deleteEl(${i})" title="Delete">
+                    <span class="material-symbols-outlined !text-[12px]">delete</span>
+                </button>
+                <div class="action-btn cursor-move" title="Drag to reorder"><span class="material-symbols-outlined !text-[12px]">drag_indicator</span></div>
+            </div>
+            <div class="element-content" style="${el.style || ''}">
+                ${el.html}
+            </div>
+            <div class="resize-handle" onmousedown="event.stopPropagation(); startResize(event, ${i})"></div>
+        </div>`;
+    }).join('');
+}
+
+function selectEl(idx, isShift = false) {
+    if (isShift) {
+        if (selectedIndices.includes(idx)) {
+            selectedIndices = selectedIndices.filter(i => i !== idx);
+        } else {
+            selectedIndices.push(idx);
+        }
+    } else {
+        selectedIndices = [idx];
+    }
+    renderElements();
+    if (selectedIndices.length === 1) {
+        const el = elements[selectedIndices[0]];
+        document.getElementById('inspector-target').textContent = el.type + ' module';
+    } else if (selectedIndices.length > 1) {
+        document.getElementById('inspector-target').textContent = `${selectedIndices.length} items selected`;
+    }
+}
+
+function addToCanvas(type) {
+    saveHistory();
+    const templates = getElementTemplates();
+    if (templates[type]) {
+        elements.push({ type, html: templates[type] });
+        selectedIndices = [elements.length - 1];
+        renderElements();
+        showToast(`${type} added`, 'add_circle');
+        syncPulse();
+    }
+}
+
+// ========== DRAG & DROP REORDERING ==========
+function handleDragStart(e, i) {
+    draggedIdx = i;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', i);
+    setTimeout(() => e.target.classList.add('dragging'), 0);
+}
+
+function handleDragOver(e, i) {
+    e.preventDefault();
+    if (draggedIdx === i) return;
+    const target = e.currentTarget;
+    const rect = target.getBoundingClientRect();
+    const midpoint = rect.top + rect.height / 2;
+    if (e.clientY < midpoint) {
+        target.style.borderTop = '2px solid #10B981';
+        target.style.borderBottom = '';
+    } else {
+        target.style.borderBottom = '2px solid #10B981';
+        target.style.borderTop = '';
+    }
+}
+
+function handleDragEnd(e) {
+    document.querySelectorAll('.builder-element').forEach(el => {
+        el.style.borderTop = '';
+        el.style.borderBottom = '';
+        el.classList.remove('dragging');
+    });
+}
+
+function handleDrop(e, targetIdx) {
+    e.preventDefault();
+    if (draggedIdx === null || draggedIdx === targetIdx) return;
+    saveHistory();
+    const movedEl = elements.splice(draggedIdx, 1)[0];
+    elements.splice(targetIdx, 0, movedEl);
+    selectedIndices = [targetIdx];
+    renderElements();
+    draggedIdx = null;
+    showToast('Reordered', 'swap_vert');
+}
+
+// ========== ACTIONS ==========
+function duplicateEl(idx) {
+    saveHistory();
+    const clone = JSON.parse(JSON.stringify(elements[idx]));
+    elements.splice(idx + 1, 0, clone);
+    selectedIndices = [idx + 1];
+    renderElements();
+    showToast('Duplicated', 'content_copy');
+}
+
+function deleteEl(idx) {
+    if (elements.length === 0) return;
+    saveHistory();
+    elements.splice(idx, 1);
+    selectedIndices = elements.length > 0 ? [Math.max(0, idx - 1)] : [];
+    renderElements();
+    showToast('Deleted', 'delete');
+}
+
+// ========== RESIZING ==========
+let isResizing = false;
+let resizeIdx = null;
+let initialY = 0;
+let initialHeight = 0;
+
+function startResize(e, idx) {
+    isResizing = true;
+    resizeIdx = idx;
+    initialY = e.clientY;
+    const el = document.querySelector(`.builder-element[data-idx="${idx}"] .element-content`);
+    initialHeight = el.offsetHeight;
+    document.addEventListener('mousemove', handleResize);
+    document.addEventListener('mouseup', stopResize);
+    document.body.style.cursor = 'nwse-resize';
+}
+
+function handleResize(e) {
+    if (!isResizing) return;
+    const diff = e.clientY - initialY;
+    // Snap to 32px grid
+    const newHeight = Math.max(32, Math.round((initialHeight + diff) / 32) * 32);
+    const el = document.querySelector(`.builder-element[data-idx="${resizeIdx}"] .element-content`);
+    el.style.height = newHeight + 'px';
+    el.style.minHeight = newHeight + 'px';
+}
+
+function stopResize() {
+    if (isResizing) {
+        saveHistory();
+        const elContainer = document.querySelector(`.builder-element[data-idx="${resizeIdx}"] .element-content`);
+        elements[resizeIdx].style = (elements[resizeIdx].style || '') + `;min-height:${elContainer.style.minHeight};height:${elContainer.style.height};`;
+        isResizing = false;
+        document.removeEventListener('mousemove', handleResize);
+        document.removeEventListener('mouseup', stopResize);
+        document.body.style.cursor = '';
+        syncPulse();
+    }
+}
+
+function syncPulse() {
+    const dot = document.getElementById('sync-dot');
+    const status = document.getElementById('sync-status');
+    dot.classList.remove('bg-emerald-500');
+    dot.classList.add('bg-amber-400');
+    status.textContent = 'Node Engine: Updating...';
+    setTimeout(() => {
+        dot.classList.remove('bg-amber-400');
+        dot.classList.add('bg-emerald-500');
+        status.textContent = 'Node Engine: Synced';
+    }, 800);
+}
+
+// ========== SIDEBAR: CATEGORY TOGGLE ==========
+document.querySelectorAll('.comp-header').forEach(header => {
+    header.addEventListener('click', () => {
+        const group = header.closest('.comp-group');
+        const items = group.querySelector('.comp-items');
+        const arrow = header.querySelector('.toggle-arrow');
+        const icon = header.querySelector('.material-symbols-outlined:first-child');
+        const label = header.querySelector('span:last-child');
+
+        if (items.classList.contains('hidden')) {
+            items.classList.remove('hidden');
+            arrow.textContent = 'expand_less';
+            icon.classList.remove('text-slate-500');
+            icon.classList.add('text-emerald-400');
+            label.classList.remove('text-slate-500');
+            label.classList.add('text-emerald-400');
+        } else {
+            items.classList.add('hidden');
+            arrow.textContent = 'expand_more';
+            icon.classList.remove('text-emerald-400');
+            icon.classList.add('text-slate-500');
+            label.classList.remove('text-emerald-400');
+            label.classList.add('text-slate-500');
+        }
+    });
+});
+
+// ========== SIDEBAR: COMPONENT ITEMS CLICK ==========
+document.querySelectorAll('.comp-item').forEach(item => {
+    item.addEventListener('click', () => {
+        const type = item.dataset.type;
+        addToCanvas(type);
+    });
+});
+
+// ========== SIDEBAR: SEARCH ==========
+document.getElementById('comp-search').addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase().trim();
+    document.querySelectorAll('.comp-group').forEach(group => {
+        let groupHasMatch = false;
+        group.querySelectorAll('.comp-item').forEach(item => {
+            const text = item.textContent.toLowerCase();
+            const type = item.dataset.type.toLowerCase();
+            const match = !q || text.includes(q) || type.includes(q);
+            item.style.display = match ? '' : 'none';
+            if (match) groupHasMatch = true;
+        });
+        // Show/hide entire group
+        group.style.display = groupHasMatch ? '' : 'none';
+        // Auto expand groups with search matches
+        if (q && groupHasMatch) {
+            const items = group.querySelector('.comp-items');
+            const arrow = group.querySelector('.toggle-arrow');
+            if (items.classList.contains('hidden')) {
+                items.classList.remove('hidden');
+                arrow.textContent = 'expand_less';
+            }
+        }
+    });
+});
+
+// Quick blocks
+document.querySelectorAll('.quick-block').forEach(block => {
+    block.addEventListener('click', () => addToCanvas(block.dataset.type));
+});
+
+// Construct button
+document.getElementById('construct-btn').addEventListener('click', () => addToCanvas('section'));
+
+// ========== UNDO / REDO ==========
+document.getElementById('undo-btn').addEventListener('click', () => {
+    if (undoStack.length > 0) {
+        redoStack.push(JSON.stringify(elements));
+        elements = JSON.parse(undoStack.pop());
+        selectedIndices = elements.length > 0 ? [0] : [];
+        renderElements();
+        showToast('Undo', 'undo');
+        syncPulse();
+    } else { showToast('Nothing to undo', 'info'); }
+});
+
+document.getElementById('redo-btn').addEventListener('click', () => {
+    if (redoStack.length > 0) {
+        undoStack.push(JSON.stringify(elements));
+        elements = JSON.parse(redoStack.pop());
+        selectedIndices = elements.length > 0 ? [0] : [];
+        renderElements();
+        showToast('Redo', 'redo');
+        syncPulse();
+    } else { showToast('Nothing to redo', 'info'); }
+});
+
+// ========== DEVICE PREVIEW TOGGLE ==========
+document.querySelectorAll('.device-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.device-btn').forEach(b => {
+            b.classList.remove('text-emerald-500', 'bg-slate-800');
+            b.classList.add('text-slate-500');
+        });
+        btn.classList.add('text-emerald-500', 'bg-slate-800');
+        btn.classList.remove('text-slate-500');
+
+        const area = document.getElementById('canvas-area');
+        area.classList.remove('device-desktop', 'device-tablet', 'device-mobile');
+        const device = btn.id.replace('device-', '');
+        area.classList.add('device-' + device);
+        showToast(device.charAt(0).toUpperCase() + device.slice(1) + ' view', btn.querySelector('.material-symbols-outlined').textContent);
+    });
+});
+
+// ========== INSPECTOR TABS ==========
+document.querySelectorAll('.inspector-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.inspector-tab').forEach(t => {
+            t.classList.remove('text-emerald-400', 'border-b-2', 'border-emerald-500');
+            t.classList.add('text-slate-600');
+        });
+        tab.classList.add('text-emerald-400', 'border-b-2', 'border-emerald-500');
+        tab.classList.remove('text-slate-600');
+        document.querySelectorAll('.inspector-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById('tab-' + tab.dataset.tab).classList.remove('hidden');
+    });
+});
+
+// ========== ALIGNMENT BUTTONS ==========
+// ========== ALIGNMENT BUTTONS ==========
+document.querySelectorAll('.align-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.align-btn').forEach(b => {
+            b.classList.remove('bg-slate-800', 'text-emerald-400');
+            b.classList.add('text-slate-600');
+        });
+        btn.classList.add('bg-slate-800', 'text-emerald-400');
+        btn.classList.remove('text-slate-600');
+        const align = btn.dataset.align;
+        if (selectedIndices.length > 0) {
+            saveHistory();
+            selectedIndices.forEach(idx => {
+                const elContent = document.querySelector(`.builder-element[data-idx="${idx}"] .element-content`);
+                if (elContent) elContent.style.textAlign = align;
+                elements[idx].style = (elements[idx].style || '') + `;text-align:${align};`;
+            });
+            showToast('Aligned ' + align, 'format_align_' + align);
+            syncPulse();
+        }
+    });
+});
+
+// ========== TYPOGRAPHY CONTROLS ==========
+document.getElementById('font-family-select').addEventListener('change', (e) => {
+    if (selectedIndices.length > 0) {
+        saveHistory();
+        selectedIndices.forEach(idx => {
+            const el = document.querySelector(`.builder-element[data-idx="${idx}"] .element-content`);
+            if (el) el.style.fontFamily = e.target.value;
+            elements[idx].style = (elements[idx].style || '') + `;font-family:${e.target.value};`;
+        });
+        showToast('Font: ' + e.target.value, 'text_fields');
+        syncPulse();
+    }
+});
+
+document.getElementById('font-size-input').addEventListener('input', (e) => {
+    if (selectedIndices.length === 1) {
+        const idx = selectedIndices[0];
+        const el = document.querySelector(`.builder-element[data-idx="${idx}"]`);
+        const target = el.querySelector('h1, h2, h3, p, span, button');
+        if (target) {
+            target.style.fontSize = e.target.value + 'px';
+            elements[idx].html = el.querySelector('.element-content').innerHTML;
+            syncPulse();
+        }
+    }
+});
+
+document.getElementById('font-weight-select').addEventListener('change', (e) => {
+    if (selectedIndices.length === 1) {
+        const idx = selectedIndices[0];
+        const el = document.querySelector(`.builder-element[data-idx="${idx}"]`);
+        const target = el.querySelector('h1, h2, h3, p, span, button');
+        if (target) {
+            target.style.fontWeight = e.target.value;
+            elements[idx].html = el.querySelector('.element-content').innerHTML;
+            syncPulse();
+        }
+    }
+});
+
+// ========== DESIGN CONTROLS ==========
+const updateElementStyle = (prop, val, isUnit = false) => {
+    if (selectedIndices.length > 0) {
+        saveHistory();
+        selectedIndices.forEach(idx => {
+            const el = document.querySelector(`.builder-element[data-idx="${idx}"] .element-content`);
+            if (el) el.style[prop] = isUnit ? val + 'px' : val;
+            elements[idx].style = (elements[idx].style || '') + `;${prop.replace(/[A-Z]/g, m => '-' + m.toLowerCase())}:${isUnit ? val + 'px' : val};`;
+        });
+        syncPulse();
+    }
+};
+
+document.getElementById('color-primary').addEventListener('input', (e) => {
+    document.getElementById('color-primary-hex').textContent = e.target.value.toUpperCase();
+    updateElementStyle('color', e.target.value);
+});
+
+document.getElementById('color-bg').addEventListener('input', (e) => {
+    document.getElementById('color-bg-hex').textContent = e.target.value.toUpperCase();
+    updateElementStyle('backgroundColor', e.target.value);
+});
+
+document.getElementById('padding-input').addEventListener('input', (e) => updateElementStyle('padding', e.target.value, true));
+document.getElementById('margin-input').addEventListener('input', (e) => updateElementStyle('margin', e.target.value, true));
+document.getElementById('radius-slider').addEventListener('input', (e) => updateElementStyle('borderRadius', e.target.value, true));
+document.getElementById('opacity-slider').addEventListener('input', (e) => updateElementStyle('opacity', e.target.value / 100));
+document.getElementById('shadow-select').addEventListener('change', (e) => updateElementStyle('boxShadow', e.target.value));
+
+// ========== LAYOUT CONTROLS ==========
+document.querySelectorAll('.layout-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const prop = btn.dataset.prop;
+        const val = btn.dataset.val;
+        // Visual toggle
+        btn.parentElement.querySelectorAll('.layout-btn').forEach(b => b.classList.remove('active', 'bg-slate-800', 'text-emerald-400'));
+        btn.classList.add('active', 'bg-slate-800', 'text-emerald-400');
+        
+        if (selectedIndices.length > 0) {
+            saveHistory();
+            selectedIndices.forEach(idx => {
+                const el = document.querySelector(`.builder-element[data-idx="${idx}"] .element-content`);
+                if (el) {
+                    el.style.display = 'flex';
+                    el.style[prop] = val;
+                    elements[idx].style = (elements[idx].style || '') + `;display:flex;${prop.replace(/[A-Z]/g, m => '-' + m.toLowerCase())}:${val};`;
+                }
+            });
+            syncPulse();
+        }
+    });
+});
+
+document.getElementById('gap-input').addEventListener('input', (e) => updateElementStyle('gap', e.target.value, true));
+
+// ========== CONTENT TAB LOGIC ==========
+function populateContentTab() {
+    if (selectedIndices.length !== 1) {
+        document.getElementById('tab-content').innerHTML = `
+            <div class="h-full flex flex-col items-center justify-center p-12 text-center text-slate-600">
+                <span class="material-symbols-outlined text-4xl mb-4">info</span>
+                <p class="text-xs font-bold uppercase tracking-widest">Single Selection Only</p>
+                <p class="text-[10px] mt-2">Please select exactly one element to edit its specific contents.</p>
+            </div>`;
+        return;
+    }
+
+    const idx = selectedIndices[0];
+    const el = elements[idx];
+    const container = document.getElementById('canvas-elements-container').children[idx];
+    const content = container.querySelector('.element-content');
+
+    // Reset fields
+    document.getElementById('img-field').style.display = 'none';
+    document.getElementById('link-field').style.display = 'none';
+    document.getElementById('placeholder-field').style.display = 'none';
+
+    // Main Text
+    const textTarget = content.querySelector('h1, h2, h3, h4, p, span, blockquote, button');
+    document.getElementById('content-main').value = textTarget ? textTarget.textContent.trim() : '';
+
+    // Image
+    const imgTarget = content.querySelector('img') || (content.style.backgroundImage ? content : null);
+    if (imgTarget) {
+        document.getElementById('img-field').style.display = 'block';
+        document.getElementById('content-img-url').value = imgTarget.src || '';
+    }
+
+    // Link
+    const linkTarget = content.querySelector('a') || (content.tagName === 'A' ? content : null);
+    if (linkTarget) {
+        document.getElementById('link-field').style.display = 'block';
+        document.getElementById('content-link-url').value = linkTarget.href || '#';
+    }
+
+    // Form
+    const inputTarget = content.querySelector('input, textarea');
+    if (inputTarget) {
+        document.getElementById('placeholder-field').style.display = 'block';
+        document.getElementById('content-placeholder').value = inputTarget.placeholder || '';
+    }
+}
+
+document.getElementById('apply-content-btn').addEventListener('click', () => {
+    if (selectedIndices.length !== 1) return;
+    saveHistory();
+    const idx = selectedIndices[0];
+    const elContainer = document.querySelector(`.builder-element[data-idx="${idx}"]`);
+    const content = elContainer.querySelector('.element-content');
+
+    const mainText = document.getElementById('content-main').value;
+    const textTarget = content.querySelector('h1, h2, h3, h4, p, span, blockquote, button');
+    if (textTarget) textTarget.textContent = mainText;
+
+    const imgUrl = document.getElementById('content-img-url').value;
+    const imgTarget = content.querySelector('img');
+    if (imgTarget) imgTarget.src = imgUrl;
+
+    const linkUrl = document.getElementById('content-link-url').value;
+    const linkTarget = content.querySelector('a');
+    if (linkTarget) linkTarget.href = linkUrl;
+
+    const placeholder = document.getElementById('content-placeholder').value;
+    const inputTarget = content.querySelector('input, textarea');
+    if (inputTarget) inputTarget.placeholder = placeholder;
+
+    elements[idx].html = content.innerHTML;
+    showToast('Content sync complete', 'auto_fix_high');
+    syncPulse();
+});
+
+// ========== EXTRA TAB ==========
+document.getElementById('anim-select').addEventListener('change', (e) => {
+    if (selectedIndices.length > 0) {
+        saveHistory();
+        selectedIndices.forEach(idx => {
+            const el = document.querySelector(`.builder-element[data-idx="${idx}"]`);
+            el.className = el.className.replace(/anim-[a-z-]+/g, '').trim();
+            if (e.target.value !== 'none') el.classList.add('anim-' + e.target.value);
+            elements[idx].animation = e.target.value;
+        });
+        showToast('Animation applied', 'bolt');
+    }
+});
+
+document.querySelectorAll('.hide-check').forEach(check => {
+    check.addEventListener('change', (e) => {
+        const device = check.dataset.device;
+        if (selectedIndices.length > 0) {
+            saveHistory();
+            selectedIndices.forEach(idx => {
+                const el = document.querySelector(`.builder-element[data-idx="${idx}"]`);
+                if (e.target.checked) el.classList.add('hidden-' + device);
+                else el.classList.remove('hidden-' + device);
+                elements[idx].hidden = elements[idx].hidden || {};
+                elements[idx].hidden[device] = e.target.checked;
+            });
+        }
+    });
+});
+
+// ========== COLLAPSIBLE SECTIONS ==========
+['typo', 'color', 'geo', 'effects'].forEach(sec => {
+    const toggle = document.getElementById(sec + '-toggle');
+    const content = document.getElementById(sec + '-content');
+    if (toggle && content) {
+        toggle.addEventListener('click', () => {
+            const isHidden = content.classList.toggle('hidden');
+            const icon = toggle.querySelector('.toggle-icon, .material-symbols-outlined');
+            if (icon) icon.textContent = isHidden ? 'expand_more' : 'expand_less';
+        });
+    }
+});
+
+// ========== DELETE SELECTED ==========
+document.getElementById('delete-selected-btn').addEventListener('click', () => {
+    if (selectedIndices.length > 0) {
+        saveHistory();
+        [...selectedIndices].sort((a,b) => b-a).forEach(idx => deleteEl(idx));
+        showToast('Selected elements deleted', 'delete');
+    }
+});
+
+// ========== EXPORT ==========
+document.getElementById('export-btn').addEventListener('click', () => {
+    generateExportCode('html');
+    openModal('export-modal');
+});
+
+document.getElementById('close-export').addEventListener('click', () => closeModal('export-modal'));
+document.getElementById('export-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeModal('export-modal');
+});
+
+function generateExportCode(type) {
+    const codeArea = document.getElementById('export-code');
+    if (type === 'json') {
+        codeArea.textContent = JSON.stringify(elements, null, 2);
+    } else if (type === 'html') {
+        const fullHtml = elements.map(el => `<div style="${el.style || ''}">${el.html}</div>`).join('\n');
+        codeArea.textContent = `<!DOCTYPE html>\n<html>\n<head>\n<script src="https://cdn.tailwindcss.com"></script>\n</head>\n<body>\n${fullHtml}\n</body>\n</html>`;
+    } else {
+        codeArea.textContent = 'React Export Ready...';
+    }
+}
+
+document.querySelectorAll('.export-type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.export-type-btn').forEach(b => {
+            b.classList.remove('bg-emerald-500/10', 'text-emerald-400', 'border-emerald-500/20');
+            b.classList.add('bg-slate-900', 'text-slate-400', 'border-slate-800');
+        });
+        btn.classList.add('bg-emerald-500/10', 'text-emerald-400', 'border-emerald-500/20');
+        btn.classList.remove('bg-slate-900', 'text-slate-400', 'border-slate-800');
+        generateExportCode(btn.dataset.type);
+    });
+});
+
+// ========== KEYBOARD SHORTCUTS ==========
+document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+        if (e.key === 'Escape') e.target.blur();
+        return;
+    }
+
+    if (e.ctrlKey || e.metaKey) {
+        switch (e.key.toLowerCase()) {
+            case 'z': e.preventDefault(); document.getElementById('undo-btn').click(); break;
+            case 'y': e.preventDefault(); document.getElementById('redo-btn').click(); break;
+            case 's': e.preventDefault(); showToast('Project saved', 'save'); break;
+            case 'd': e.preventDefault(); if (selectedIndices.length === 1) duplicateEl(selectedIndices[0]); break;
+        }
+    } else {
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+            if (selectedIndices.length > 0) {
+                document.getElementById('delete-selected-btn').click();
+            }
+        }
+        if (e.key === 'Escape') {
+            selectedIndices = [];
+            renderElements();
+        }
+    }
+});
+
+// ========== DOUBLE CLICK TO EDIT ==========
+document.getElementById('canvas-elements-container').addEventListener('dblclick', (e) => {
+    const textTarget = e.target;
+    if (['H1','H2','H3','P','SPAN','A','BUTTON','BLOCKQUOTE'].includes(textTarget.tagName)) {
+        textTarget.contentEditable = 'true';
+        textTarget.focus();
+        showToast('Editing text', 'edit');
+        
+        textTarget.addEventListener('blur', function blurHandler() {
+            textTarget.contentEditable = 'false';
+            const parentEl = textTarget.closest('.builder-element');
+            if (parentEl) {
+                const idx = parseInt(parentEl.dataset.idx);
+                saveHistory();
+                elements[idx].html = parentEl.querySelector('.element-content').innerHTML;
+                syncPulse();
+            }
+            textTarget.removeEventListener('blur', blurHandler);
+        }, { once: true });
+    }
+});
+
+function updateInspector() {
+    if (selectedIndices.length === 1) {
+        const idx = selectedIndices[0];
+        const el = elements[idx];
+        const target = document.getElementById('inspector-target');
+        if (target) target.textContent = (el.type || 'module').toUpperCase();
+
+        const container = document.querySelector(`.builder-element[data-idx="${idx}"]`);
+        const content = container.querySelector('.element-content');
+        const styles = content.style;
+        
+        // Sync Inputs
+        document.getElementById('font-size-input').value = parseInt(styles.fontSize) || 16;
+        document.getElementById('font-weight-select').value = styles.fontWeight || "400";
+        document.getElementById('padding-input').value = parseInt(styles.padding) || 0;
+        document.getElementById('margin-input').value = parseInt(styles.margin) || 0;
+        document.getElementById('radius-slider').value = parseInt(styles.borderRadius) || 0;
+        document.getElementById('opacity-slider').value = (styles.opacity || 1) * 100;
+        
+        const rgbToHex = (rgb) => {
+            if (!rgb) return "#000000";
+            const res = rgb.match(/\d+/g);
+            return res ? "#" + res.slice(0, 3).map(x => parseInt(x).toString(16).padStart(2, '0')).join('').toUpperCase() : "#000000";
+        };
+        document.getElementById('color-primary').value = rgbToHex(styles.color);
+        document.getElementById('color-primary-hex').textContent = rgbToHex(styles.color);
+        document.getElementById('color-bg').value = rgbToHex(styles.backgroundColor);
+        document.getElementById('color-bg-hex').textContent = rgbToHex(styles.backgroundColor);
+
+        document.getElementById('gap-input').value = parseInt(styles.gap) || 0;
+        document.getElementById('anim-select').value = el.animation || 'none';
+        
+        document.querySelectorAll('.hide-check').forEach(check => {
+            check.checked = !!(el.hidden && el.hidden[check.dataset.device]);
+        });
+
+        if (!document.getElementById('tab-content').classList.contains('hidden')) {
+            populateContentTab();
+        }
+    } else {
+        const target = document.getElementById('inspector-target');
+        if (target) target.textContent = selectedIndices.length > 1 ? `${selectedIndices.length} SELECTED` : 'NO SELECTION';
+    }
+}
+
+// ========== INITIALIZATION ==========
+renderElements();
+
+if (window.location.hash === '#export') {
+    setTimeout(() => document.getElementById('export-btn').click(), 500);
+}
+
+// ========== GLOBAL EVENTS ==========
+document.getElementById('copy-export-btn').addEventListener('click', () => {
+    const code = document.getElementById('export-code').textContent;
+    navigator.clipboard.writeText(code).then(() => showToast('Copied to clipboard!', 'content_copy'));
+});
+
+document.getElementById('config-btn').addEventListener('click', () => openModal('config-modal'));
+document.getElementById('close-config').addEventListener('click', () => closeModal('config-modal'));
+document.getElementById('config-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModal('config-modal'); });
+
+document.getElementById('canvas-bg-color').addEventListener('input', (e) => {
+    document.getElementById('canvas-frame').style.backgroundColor = e.target.value;
+});
+
+document.getElementById('grid-toggle').addEventListener('change', (e) => {
+    const area = document.getElementById('canvas-area');
+    if (e.target.checked) area.classList.add('bg-grid-slate');
+    else area.classList.remove('bg-grid-slate');
+});
+
+document.getElementById('save-config-btn').addEventListener('click', () => {
+    const name = document.getElementById('project-name').value;
+    localStorage.setItem('ez-dd-project-name', name);
+    showToast('Config saved: ' + name, 'settings');
+    closeModal('config-modal');
+});
+
+document.getElementById('docs-link').addEventListener('click', (e) => { e.preventDefault(); showToast('Documentation coming soon', 'description'); });
+document.getElementById('support-link').addEventListener('click', (e) => { e.preventDefault(); showToast('Support: help@ezdd.app', 'support_agent'); });
+
+setTimeout(syncPulse, 1000);
+</script>
+</body>
+</html>
+-modal');
+    }, 500);
+}
+</script>
+</body></html>
