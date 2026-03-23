@@ -3,7 +3,7 @@
 <html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Ez D&amp;d - Dashboard</title>
+<title>Ez D&d - Dashboard</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -42,7 +42,7 @@
         }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
+            background-color: #020617;
         }
         .toast {
             position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%) translateY(20px);
@@ -81,18 +81,17 @@
     </style>
 </head>
 <body class="text-on-surface selection:bg-primary/30 selection:text-primary">
+<canvas id="hero-shape-grid" class="fixed inset-0 pointer-events-none opacity-60 z-0" style="background:#020617;"></canvas>
 <!-- TopNavBar -->
-<header class="fixed top-0 w-full z-50 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800 flex justify-between items-center px-6 h-16 shadow-lg">
+<header class="fixed top-0 w-full z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800 flex justify-between items-center px-6 h-16 shadow-lg">
 <div class="flex items-center gap-8">
-<a href="index.html" class="text-xl font-bold tracking-tighter text-slate-100 hover:text-primary transition-colors">Ez Dd</a>
+<a href="index.html" class="text-xl font-bold tracking-tighter text-slate-100 hover:text-primary transition-colors">Ez D&d</a>
 <nav class="hidden md:flex items-center gap-6">
-<a class="text-slate-400 hover:text-slate-100 font-medium tracking-tight text-sm transition-colors" href="index.html">Preview</a>
-<a class="text-slate-400 hover:text-slate-100 font-medium tracking-tight text-sm transition-colors" href="builder.html">Publish</a>
-<a class="text-slate-400 hover:text-slate-100 font-medium tracking-tight text-sm transition-colors" href="builder.html">Export Code</a>
+<a class="text-slate-400 hover:text-slate-100 font-medium tracking-tight text-sm transition-colors" href="index.html">Home</a>
+<a class="text-slate-400 hover:text-slate-100 font-medium tracking-tight text-sm transition-colors" href="builder.html">Editor</a>
 </nav>
 </div>
 <div class="flex items-center gap-4">
-<button id="help-btn" class="text-slate-400 hover:text-slate-100 text-sm transition-colors">Help</button>
 <div class="h-8 w-8 rounded-full overflow-hidden hover:bg-slate-800 transition-colors cursor-pointer active:scale-95 duration-200 flex items-center justify-center" id="profile-btn">
 <span class="material-symbols-outlined text-primary text-3xl" data-icon="account_circle">account_circle</span>
 </div>
@@ -360,5 +359,123 @@ document.addEventListener('keydown', (e) => {
 // ========== INITIAL RENDER ==========
 renderProjects();
 updateProjectCount();
+</script>
+<!-- SHAPE GRID ANIMATION -->
+<script>
+    (function() {
+        const canvas = document.getElementById('hero-shape-grid');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        let w, h;
+        const cellSize = 45;
+        let totalOffsetX = 0;
+        let totalOffsetY = 0;
+        const speedX = 0.5;
+        const speedY = -0.5;
+        
+        let mouseX = -1000;
+        let mouseY = -1000;
+        const trails = new Map();
+        
+        function resize() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        }
+        
+        window.addEventListener('resize', resize);
+        resize();
+        
+        // Share mouse position globally for background effect
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+        
+        function drawShape(ctx, x, y, size, type, color, alpha) {
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = color;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+            
+            ctx.beginPath();
+            if (type === 'plus') {
+                const s = size / 2;
+                ctx.moveTo(x, y - s);
+                ctx.lineTo(x, y + s);
+                ctx.moveTo(x - s, y);
+                ctx.lineTo(x + s, y);
+                ctx.stroke();
+            } else if (type === 'dot') {
+                ctx.arc(x, y, size / 3, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+        
+        function draw() {
+            ctx.clearRect(0, 0, w, h);
+            
+            totalOffsetX += speedX;
+            totalOffsetY += speedY;
+            
+            const remX = (totalOffsetX % cellSize + cellSize) % cellSize;
+            const remY = (totalOffsetY % cellSize + cellSize) % cellSize;
+            
+            const cols = Math.ceil(w / cellSize) + 2;
+            const rows = Math.ceil(h / cellSize) + 2;
+            
+            const baseColor = 'rgba(148, 163, 184, 0.4)';
+            const highlightColor = 'rgba(16, 185, 129, 1)';
+            
+            for (let [k, v] of trails.entries()) {
+                if (v <= 0.02) trails.delete(k);
+                else trails.set(k, v - 0.02);
+            }
+            
+            for (let r = -1; r < rows; r++) {
+                for (let c = -1; c < cols; c++) {
+                    const x = c * cellSize + remX;
+                    const y = r * cellSize + remY;
+                    
+                    const globalCol = c - Math.floor(totalOffsetX / cellSize);
+                    const globalRow = r - Math.floor(totalOffsetY / cellSize);
+                    const key = `${globalCol},${globalRow}`;
+                    
+                    const centerX = x + cellSize / 2;
+                    const centerY = y + cellSize / 2;
+                    
+                    const dx = centerX - mouseX;
+                    const dy = centerY - mouseY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    const hoverRadius = 150;
+                    if (dist < hoverRadius) {
+                        const intensity = 1 - (dist / hoverRadius);
+                        const current = trails.get(key) || 0;
+                        if (intensity > current) {
+                            trails.set(key, Math.min(intensity * 1.5, 1));
+                        }
+                    }
+                    
+                    const shapeIndex = Math.abs(globalCol * 3 + globalRow * 7) % 3;
+                    const type = shapeIndex === 0 ? 'plus' : shapeIndex === 1 ? 'dot' : 'circle';
+                    
+                    drawShape(ctx, centerX, centerY, 8, type, baseColor, 1);
+                    
+                    const trailAlpha = trails.get(key) || 0;
+                    if (trailAlpha > 0) {
+                        drawShape(ctx, centerX, centerY, 8 + (trailAlpha * 2), type, highlightColor, trailAlpha);
+                    }
+                }
+            }
+            
+            requestAnimationFrame(draw);
+        }
+        
+        draw();
+    })();
 </script>
 </body></html>

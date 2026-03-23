@@ -3,7 +3,7 @@
 <html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Ez D&amp;d - Build the Future, No Code Required</title>
+<title>Ez D&d - Build the Future, No Code Required</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -40,6 +40,7 @@
       }
     </script>
 <style>
+html { scroll-behavior: smooth; }
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
@@ -99,13 +100,14 @@
     </style>
 </head>
 <body class="bg-background text-on-surface font-body selection:bg-primary/20">
+<!-- Interactive Shape Grid Background (Fixed for full page) -->
 <!-- TopNavBar (Shared Component) -->
 <header class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl flex justify-between items-center px-6 h-16 shadow-[0_10px_40px_rgba(0,0,0,0.3)] border-b border-outline-variant/50">
-<a href="index.html" class="text-xl font-bold tracking-tighter text-on-surface cursor-pointer hover:text-primary transition-colors">Ez Dd</a>
+<a href="index.html" class="text-xl font-bold tracking-tighter text-on-surface cursor-pointer hover:text-primary transition-colors">Ez D&d</a>
 <nav class="hidden md:flex items-center space-x-8 font-inter tracking-tight text-sm">
-<a class="text-primary border-b-2 border-primary font-medium" href="index.html">Preview</a>
-<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="builder.html">Publish</a>
-<a class="text-on-surface-variant hover:text-on-surface transition-colors" id="nav-export-btn" href="builder.html">Export Code</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="#features">Features</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="#how-it-works">How it works</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="builder.html">Editor</a>
 </nav>
 <div class="flex items-center space-x-4">
 <button id="help-btn" class="text-on-surface-variant hover:text-on-surface text-sm transition-colors">Help</button>
@@ -117,12 +119,9 @@
 <main class="pt-16 pb-20">
 <!-- Hero Section -->
 <section class="relative min-h-[921px] flex flex-col items-center justify-center px-6 overflow-hidden bg-background">
-<!-- Decorative Background Element -->
-<div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-30 pointer-events-none">
-<div class="absolute top-20 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-primary/20 rounded-full blur-[120px]"></div>
-</div>
+<div class="absolute inset-0 bg-gradient-to-b from-transparent to-background/50 pointer-events-none z-10"></div>
 <div class="relative z-10 max-w-4xl text-center mb-16">
-<span class="inline-block py-1 px-3 mb-6 rounded-full bg-primary/10 text-primary text-xs font-bold tracking-widest uppercase border border-primary/20">Version 2.4.0 Now Live</span>
+
 <h1 class="text-6xl md:text-8xl font-extrabold tracking-tighter text-on-surface mb-8 leading-[0.9]">
                 Build the Future, <br/><span class="text-primary">No Code Required.</span>
 </h1>
@@ -251,103 +250,203 @@
 </div>
 </div>
 </section>
-<!-- Feature highlights -->
-<section class="py-32 px-6 bg-surface-container-lowest">
-<div class="max-w-7xl mx-auto">
-<div class="flex flex-col md:flex-row items-end justify-between mb-24 gap-8">
-<div class="max-w-2xl">
-<h2 class="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface mb-6 leading-tight">
-                        Engineered for the modern <span class="text-primary italic">creator's</span> workflow.
-                    </h2>
-<p class="text-lg text-on-surface-variant font-light">
-                        We removed the friction between imagination and production. Every tool in the suite is designed to maintain your creative flow.
-                    </p>
+<!-- Magic Bento Feature Section -->
+<section id="features" class="py-24 px-6 bg-background relative overflow-hidden scroll-mt-20">
+<div class="max-w-7xl mx-auto relative z-10">
+<div class="text-center mb-16">
+<h2 class="text-3xl md:text-5xl font-extrabold tracking-tighter text-on-surface mb-6">
+                Engineered for <span class="text-primary italic">Absolute</span> Precision.
+            </h2>
+<p class="text-on-surface-variant max-w-2xl mx-auto font-light">
+                Experience the fluidity of our high-performance design system, mapped to an architectural bento grid.
+            </p>
 </div>
-<div class="hidden md:block w-32 h-[2px] bg-primary mb-4 opacity-50"></div>
+
+<!-- Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-[180px]" id="bento-grid">
+<!-- Card 1: Large Feature -->
+<div class="md:col-span-8 md:row-span-2 bento-card group">
+<div class="bento-content p-8 flex flex-col justify-end">
+<div class="flex items-center gap-4 mb-4">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary text-3xl">drag_indicator</span>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-4 gap-px bg-outline-variant/30 rounded-2xl overflow-hidden border border-outline-variant/30 shadow-2xl">
-<!-- Feature Card 1: Drag & Drop → Opens Builder -->
-<a href="builder.html" class="bg-surface p-10 hover:bg-surface-container transition-all group cursor-pointer block no-underline">
-<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform border border-primary/20">
-<span class="material-symbols-outlined text-primary" data-icon="drag_indicator">drag_indicator</span>
+<h3 class="text-2xl font-bold text-white">Advanced Drag &amp; Drop</h3>
 </div>
-<h3 class="text-xl font-bold mb-4 text-on-surface">Drag &amp; Drop</h3>
-<p class="text-on-surface-variant text-sm leading-relaxed mb-6">
-                        Fluid interaction model that snaps to architectural grids with pixel precision.
-                    </p>
-<span class="inline-flex items-center gap-1 text-primary text-xs font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
-    Open Builder <span class="material-symbols-outlined !text-[14px]">arrow_forward</span>
-</span>
-</a>
-<!-- Feature Card 2: Real-time Preview → Opens Builder preview -->
-<a href="builder.html" class="bg-surface p-10 hover:bg-surface-container transition-all group cursor-pointer block no-underline">
-<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform border border-primary/20">
-<span class="material-symbols-outlined text-primary" data-icon="visibility">visibility</span>
+<p class="text-on-surface-variant max-w-md">Our proprietary interaction engine supports multi-select, snap-to-grid, and real-time collision detection for a seamless building experience.</p>
 </div>
-<h3 class="text-xl font-bold mb-4 text-on-surface">Real-time Preview</h3>
-<p class="text-on-surface-variant text-sm leading-relaxed mb-6">
-                        See your changes instantly as you build, with zero-latency synchronization.
-                    </p>
-<span class="inline-flex items-center gap-1 text-primary text-xs font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
-    Try Preview <span class="material-symbols-outlined !text-[14px]">arrow_forward</span>
-</span>
-</a>
-<!-- Feature Card 3: One-click Deploy → Opens Publish flow -->
-<a href="success.html" class="bg-surface p-10 hover:bg-surface-container transition-all group cursor-pointer block no-underline">
-<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform border border-primary/20">
-<span class="material-symbols-outlined text-primary" data-icon="rocket_launch">rocket_launch</span>
+<div class="spotlight"></div>
 </div>
-<h3 class="text-xl font-bold mb-4 text-on-surface">One-click Deploy</h3>
-<p class="text-on-surface-variant text-sm leading-relaxed mb-6">
-                        Push your masterpiece to production-ready global infrastructure in seconds.
-                    </p>
-<span class="inline-flex items-center gap-1 text-primary text-xs font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
-    Deploy Now <span class="material-symbols-outlined !text-[14px]">arrow_forward</span>
-</span>
-</a>
-<!-- Feature Card 4: Export Code → Opens Builder with export -->
-<a href="builder.html#export" class="bg-surface p-10 hover:bg-surface-container transition-all group cursor-pointer block no-underline">
-<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform border border-primary/20">
-<span class="material-symbols-outlined text-primary" data-icon="code">code</span>
+
+<!-- Card 2: Small Square -->
+<div class="md:col-span-4 md:row-span-1 bento-card group">
+<div class="bento-content p-6 flex flex-col justify-center items-center text-center">
+<span class="material-symbols-outlined text-primary text-4xl mb-3 group-hover:rotate-12 transition-transform">bolt</span>
+<h3 class="font-bold text-white">Instant Sync</h3>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">Zero Latency</p>
 </div>
-<h3 class="text-xl font-bold mb-4 text-on-surface">Export Code</h3>
-<p class="text-on-surface-variant text-sm leading-relaxed mb-6">
-                        Need more control? Export clean, semantic React or HTML code at any time.
-                    </p>
-<span class="inline-flex items-center gap-1 text-primary text-xs font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
-    Export Now <span class="material-symbols-outlined !text-[14px]">arrow_forward</span>
-</span>
-</a>
+<div class="spotlight"></div>
+</div>
+
+<!-- Card 3: Small Square -->
+<div class="md:col-span-4 md:row-span-1 bento-card group">
+<div class="bento-content p-6 flex flex-col justify-center items-center text-center">
+<span class="material-symbols-outlined text-primary text-4xl mb-3 group-hover:-rotate-12 transition-transform">auto_fix_high</span>
+<h3 class="font-bold text-white">Auto Layout</h3>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">Smart Grids</p>
+</div>
+<div class="spotlight"></div>
+</div>
+
+<!-- Card 4: Tall -->
+<div class="md:col-span-4 md:row-span-2 bento-card group">
+<div class="bento-content p-8 flex flex-col h-full bg-gradient-to-b from-transparent to-primary/5">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 mb-6">
+<span class="material-symbols-outlined text-primary">analytics</span>
+</div>
+<h3 class="text-xl font-bold text-white mb-2">Live Analytics</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">Track every user interaction directly from your dashboard with our integrated telemetry suite.</p>
+<div class="mt-auto pt-4 border-t border-outline-variant/30 text-[10px] font-bold text-primary tracking-widest uppercase">Proprietary Tech</div>
+</div>
+<div class="spotlight"></div>
+</div>
+
+<!-- Card 5: Wide -->
+<div class="md:col-span-8 md:row-span-1 bento-card group">
+<div class="bento-content p-8 flex items-center justify-between gap-8">
+<div>
+<h3 class="text-xl font-bold text-white mb-2">Global Edge Publishing</h3>
+<p class="text-sm text-on-surface-variant">Deploy to 300+ edge locations worldwide with sub-200ms cold starts.</p>
+</div>
+<div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
+<span class="material-symbols-outlined text-primary text-3xl">public</span>
+</div>
+</div>
+<div class="spotlight"></div>
+</div>
+
+<!-- Card 6: Small Square -->
+<div class="md:col-span-4 md:row-span-1 bento-card group">
+<div class="bento-content p-6 flex flex-col justify-center items-center text-center">
+<span class="material-symbols-outlined text-primary text-4xl mb-3 group-hover:scale-110 transition-transform">security</span>
+<h3 class="font-bold text-white">SSL Included</h3>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">Military Grade</p>
+</div>
+<div class="spotlight"></div>
+</div>
+
+<!-- Card 7: Medium -->
+<div class="md:col-span-4 md:row-span-1 bento-card group">
+<div class="bento-content p-8 flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-3xl">devices</span>
+<h3 class="text-lg font-bold text-white">Truly Responsive</h3>
+</div>
+<div class="spotlight"></div>
+</div>
 </div>
 </div>
 </section>
+
+<style>
+/* Magic Bento Styles */
+.bento-card {
+    position: relative;
+    background: rgba(13, 18, 31, 0.8);
+    border: 1px solid rgba(51, 65, 85, 0.3);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.bento-card:hover {
+    border-color: rgba(16, 185, 129, 0.4);
+}
+.bento-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+}
+.spotlight {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: radial-gradient(
+        400px circle at var(--x, 0px) var(--y, 0px),
+        rgba(16, 185, 129, 0.1),
+        transparent 80%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.bento-card:hover .spotlight {
+    opacity: 1;
+}
+</style>
+
+<script>
+// Spotlight Effect for Bento Grid
+document.querySelectorAll('.bento-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--x', (e.clientX - rect.left) + 'px');
+        card.style.setProperty('--y', (e.clientY - rect.top) + 'px');
+    });
+});
+</script>
+<!-- How it works section -->
+<section id="how-it-works" class="py-32 px-6 bg-background border-t border-outline-variant/10 scroll-mt-20">
+<div class="max-w-7xl mx-auto">
+<div class="text-center mb-16">
+<h2 class="text-4xl font-extrabold tracking-tighter text-on-surface mb-4">How it works</h2>
+<p class="text-on-surface-variant max-w-2xl mx-auto">Three simple steps to launch your digital presence with Ez D&d.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+<div class="space-y-4">
+<div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto border border-primary/20">
+<span class="material-symbols-outlined text-primary" data-icon="brush">brush</span>
+</div>
+<h3 class="text-xl font-bold text-on-surface">1. Choose & Design</h3>
+<p class="text-sm text-on-surface-variant">Start with a showcase template or a blank canvas. Drag and drop components to build your vision.</p>
+</div>
+<div class="space-y-4">
+<div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto border border-primary/20">
+<span class="material-symbols-outlined text-primary" data-icon="tune">tune</span>
+</div>
+<h3 class="text-xl font-bold text-on-surface">2. Customize</h3>
+<p class="text-sm text-on-surface-variant">Fine-tune every detail. Change colors, fonts, and layouts with real-time feedback using our property inspector.</p>
+</div>
+<div class="space-y-4">
+<div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto border border-primary/20">
+<span class="material-symbols-outlined text-primary" data-icon="rocket_launch">rocket_launch</span>
+</div>
+<h3 class="text-xl font-bold text-on-surface">3. Launch</h3>
+<p class="text-sm text-on-surface-variant">Hit publish and your site is instantly live on our global edge infrastructure. No hosting setup required.</p>
+</div>
+</div>
+</div>
+</section>
+
 <!-- Asymmetric Bento Section -->
 <section class="py-24 px-6 bg-background">
 <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8">
-<a href="builder.html" class="md:col-span-8 h-[400px] bg-surface-container-lowest rounded-2xl p-12 flex flex-col justify-between border border-outline-variant/50 shadow-sm overflow-hidden relative group no-underline hover:border-primary/30 transition-all">
+<div class="md:col-span-8 h-[400px] bg-surface-container-lowest rounded-2xl p-12 flex flex-col justify-between border border-outline-variant/50 shadow-sm overflow-hidden relative group">
 <div>
 <h3 class="text-3xl font-bold text-on-surface mb-4">Responsive by Default</h3>
 <p class="text-on-surface-variant max-w-sm">Every element automatically adapts to mobile, tablet, and desktop viewports.</p>
-<span class="inline-flex items-center gap-1 text-primary text-xs font-bold uppercase tracking-wider mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-    Try Responsive Builder <span class="material-symbols-outlined !text-[14px]">arrow_forward</span>
-</span>
 </div>
 <div class="absolute bottom-0 right-0 w-2/3 h-1/2 translate-y-4 translate-x-4">
 <img class="w-full h-full object-cover rounded-tl-2xl shadow-2xl group-hover:-translate-y-2 transition-transform duration-500 border border-outline-variant/30" data-alt="Abstract interface showing responsive layout grids" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7mWp5LArWPO-cL2qYeGHfIFkl6yh0EXKeze2vczk3m6fuHm5qIsfQ-3CXvODJC9dn2uPHeVwLY5skhE3NefRr8LURaRgbdLmxKteQ9Fd2URnQoogzWuJmj37wUGO1jqct3mNIxQU7gqb5ZnrRyY62VU7hptUVDIGLPCxsZqc1VLvrI_JOMUwkV9uPvTjbsihVldR83EbWdvnfzvo7WN06xlAlYPXUiFQJXeIknLHgDF4bkyY0Yr5V9-Wf0LSKfueJ-BeJEjF4uNM"/>
 </div>
-</a>
-<a href="success.html" class="md:col-span-4 h-[400px] bg-primary-container rounded-2xl p-12 flex flex-col justify-end text-on-surface relative overflow-hidden border border-primary/20 no-underline hover:border-primary/40 transition-all group">
+</div>
+<div class="md:col-span-4 h-[400px] bg-primary-container rounded-2xl p-12 flex flex-col justify-end text-on-surface relative overflow-hidden border border-primary/20 transition-all group">
 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
 <img class="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-40" data-alt="Modern office desk with computer display" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIRd8cJ81a1P7w0Q978ZARkuxT0oayUOJkD7-5OCA7OvwbQw_u1nO1HwUd4Hs-MUR1PzPOXNNshu081SO_Byl5kzFUt57pFtGdvMoRkfql3EOSJ43pypXzDWQ3bC400Kapj5jZII4sTVpw7bA8YRm9cObQU8AUoAxq8zNMEeyDUa88XrCXMkYf2uuKSSIBx54mIfbwLi7tS1hLb3lQ3s8Cj2XlowpwxXpF-x4uWPuSXuMJjzd2ut-z-POqcZZMJxF9DBgT1-W1gT0"/>
 <div class="relative z-20">
 <span class="material-symbols-outlined text-4xl mb-6 text-primary" data-icon="bolt" data-weight="fill" style="font-variation-settings: 'FILL' 1;">bolt</span>
 <h3 class="text-2xl font-bold mb-2">99.9% Uptime</h3>
 <p class="text-on-surface-variant text-sm">Enterprise-grade hosting built into the platform for your peace of mind.</p>
-<span class="inline-flex items-center gap-1 text-primary text-xs font-bold uppercase tracking-wider mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-    Deploy Now <span class="material-symbols-outlined !text-[14px]">arrow_forward</span>
-</span>
 </div>
-</a>
+</div>
 </div>
 </section>
 </main>
@@ -701,5 +800,6 @@ if (saved) {
         renderCanvas();
     } catch(e) {}
 }
+
 </script>
 </body></html>
