@@ -99,28 +99,33 @@ html { scroll-behavior: smooth; }
         .sidebar-item:active { transform: scale(0.96); opacity: 0.7; }
     </style>
 </head>
-<body class="bg-background text-on-surface font-body selection:bg-primary/20">
-<!-- Interactive Shape Grid Background (Fixed for full page) -->
+<body class="text-on-surface font-body selection:bg-primary/20 overflow-x-hidden">
+<!-- Absolute Background Color Layer -->
+<div class="fixed inset-0 bg-[#020617] z-[-10]"></div>
+<!-- Interactive Atmospheric Ecosystem -->
+<canvas id="hero-shape-grid" class="fixed inset-0 pointer-events-none opacity-80 z-[-5]"></canvas>
+<canvas id="light-rays-canvas" class="fixed inset-0 pointer-events-none opacity-40 z-[-4]"></canvas>
+<div class="relative z-10"> <!-- Content Wrapper -->
 <!-- TopNavBar (Shared Component) -->
 <header class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl flex justify-between items-center px-6 h-16 shadow-[0_10px_40px_rgba(0,0,0,0.3)] border-b border-outline-variant/50">
 <a href="index.html" class="text-xl font-bold tracking-tighter text-on-surface cursor-pointer hover:text-primary transition-colors">Ez D&d</a>
-<nav class="hidden md:flex items-center space-x-8 font-inter tracking-tight text-sm">
-<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="#features">Features</a>
-<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="#how-it-works">How it works</a>
-<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="builder.html">Editor</a>
-</nav>
-<div class="flex items-center space-x-4">
-<button id="help-btn" class="text-on-surface-variant hover:text-on-surface text-sm transition-colors">Help</button>
-<a href="login.html">
-<span class="material-symbols-outlined text-on-surface cursor-pointer hover:text-primary transition-colors" data-icon="account_circle">account_circle</span>
-</a>
-</div>
+    <nav class="hidden md:flex items-center space-x-8 font-inter tracking-tight text-sm">
+        <a class="text-on-surface-variant hover:text-on-surface transition-colors" href="#features">Features</a>
+        <a class="text-on-surface-variant hover:text-on-surface transition-colors" href="#how-it-works">How it works</a>
+        <a class="text-on-surface-variant hover:text-on-surface transition-colors" href="builder.html">Editor</a>
+    </nav>
+    <div class="flex items-center space-x-4">
+        <a href="login.html">
+            <span class="material-symbols-outlined text-on-surface cursor-pointer hover:text-primary transition-colors" data-icon="account_circle">account_circle</span>
+        </a>
+    </div>
 </header>
 <main class="pt-16 pb-20">
 <!-- Hero Section -->
-<section class="relative min-h-[921px] flex flex-col items-center justify-center px-6 overflow-hidden bg-background">
-<div class="absolute inset-0 bg-gradient-to-b from-transparent to-background/50 pointer-events-none z-10"></div>
-<div class="relative z-10 max-w-4xl text-center mb-16">
+<section class="relative min-h-[921px] flex flex-col items-center justify-center px-6 overflow-hidden bg-transparent">
+<!-- Unified Atmospheric Overlay (Lighter) -->
+<div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#020617]/20 pointer-events-none z-10"></div>
+<div class="relative z-20 max-w-4xl text-center mb-16">
 
 <h1 class="text-6xl md:text-8xl font-extrabold tracking-tighter text-on-surface mb-8 leading-[0.9]">
                 Build the Future, <br/><span class="text-primary">No Code Required.</span>
@@ -250,178 +255,73 @@ html { scroll-behavior: smooth; }
 </div>
 </div>
 </section>
-<!-- Magic Bento Feature Section -->
-<section id="features" class="py-24 px-6 bg-background relative overflow-hidden scroll-mt-20">
-<div class="max-w-7xl mx-auto relative z-10">
-<div class="text-center mb-16">
-<h2 class="text-3xl md:text-5xl font-extrabold tracking-tighter text-on-surface mb-6">
-                Engineered for <span class="text-primary italic">Absolute</span> Precision.
-            </h2>
-<p class="text-on-surface-variant max-w-2xl mx-auto font-light">
-                Experience the fluidity of our high-performance design system, mapped to an architectural bento grid.
-            </p>
-</div>
+<!-- Simple Features Section (Restored) -->
+<section id="features" class="py-24 px-6 bg-transparent border-t border-outline-variant/10 scroll-mt-20">
+<div class="max-w-7xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <!-- Feature Card 1 -->
+    <div class="glass-panel bg-slate-900/40 p-8 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all duration-300 group hover:-translate-y-1">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-emerald-400 text-3xl">drag_indicator</span>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-3">Drag & Drop</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">Build your vision piece by piece with our high-performance interactive canvas engine.</p>
+    </div>
 
-<!-- Bento Grid -->
-<div class="grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-[180px]" id="bento-grid">
-<!-- Card 1: Large Feature -->
-<div class="md:col-span-8 md:row-span-2 bento-card group">
-<div class="bento-content p-8 flex flex-col justify-end">
-<div class="flex items-center gap-4 mb-4">
-<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:scale-110 transition-transform">
-<span class="material-symbols-outlined text-primary text-3xl">drag_indicator</span>
-</div>
-<h3 class="text-2xl font-bold text-white">Advanced Drag &amp; Drop</h3>
-</div>
-<p class="text-on-surface-variant max-w-md">Our proprietary interaction engine supports multi-select, snap-to-grid, and real-time collision detection for a seamless building experience.</p>
-</div>
-<div class="spotlight"></div>
-</div>
+    <!-- Feature Card 2 -->
+    <div class="glass-panel bg-slate-900/40 p-8 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all duration-300 group hover:-translate-y-1">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-emerald-400 text-3xl">bolt</span>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-3">Auto Layout</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">Every element automatically snaps to a professional grid system with smart spacing.</p>
+    </div>
 
-<!-- Card 2: Small Square -->
-<div class="md:col-span-4 md:row-span-1 bento-card group">
-<div class="bento-content p-6 flex flex-col justify-center items-center text-center">
-<span class="material-symbols-outlined text-primary text-4xl mb-3 group-hover:rotate-12 transition-transform">bolt</span>
-<h3 class="font-bold text-white">Instant Sync</h3>
-<p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">Zero Latency</p>
-</div>
-<div class="spotlight"></div>
-</div>
-
-<!-- Card 3: Small Square -->
-<div class="md:col-span-4 md:row-span-1 bento-card group">
-<div class="bento-content p-6 flex flex-col justify-center items-center text-center">
-<span class="material-symbols-outlined text-primary text-4xl mb-3 group-hover:-rotate-12 transition-transform">auto_fix_high</span>
-<h3 class="font-bold text-white">Auto Layout</h3>
-<p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">Smart Grids</p>
-</div>
-<div class="spotlight"></div>
-</div>
-
-<!-- Card 4: Tall -->
-<div class="md:col-span-4 md:row-span-2 bento-card group">
-<div class="bento-content p-8 flex flex-col h-full bg-gradient-to-b from-transparent to-primary/5">
-<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 mb-6">
-<span class="material-symbols-outlined text-primary">analytics</span>
-</div>
-<h3 class="text-xl font-bold text-white mb-2">Live Analytics</h3>
-<p class="text-sm text-on-surface-variant leading-relaxed">Track every user interaction directly from your dashboard with our integrated telemetry suite.</p>
-<div class="mt-auto pt-4 border-t border-outline-variant/30 text-[10px] font-bold text-primary tracking-widest uppercase">Proprietary Tech</div>
-</div>
-<div class="spotlight"></div>
-</div>
-
-<!-- Card 5: Wide -->
-<div class="md:col-span-8 md:row-span-1 bento-card group">
-<div class="bento-content p-8 flex items-center justify-between gap-8">
-<div>
-<h3 class="text-xl font-bold text-white mb-2">Global Edge Publishing</h3>
-<p class="text-sm text-on-surface-variant">Deploy to 300+ edge locations worldwide with sub-200ms cold starts.</p>
-</div>
-<div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
-<span class="material-symbols-outlined text-primary text-3xl">public</span>
-</div>
-</div>
-<div class="spotlight"></div>
-</div>
-
-<!-- Card 6: Small Square -->
-<div class="md:col-span-4 md:row-span-1 bento-card group">
-<div class="bento-content p-6 flex flex-col justify-center items-center text-center">
-<span class="material-symbols-outlined text-primary text-4xl mb-3 group-hover:scale-110 transition-transform">security</span>
-<h3 class="font-bold text-white">SSL Included</h3>
-<p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">Military Grade</p>
-</div>
-<div class="spotlight"></div>
-</div>
-
-<!-- Card 7: Medium -->
-<div class="md:col-span-4 md:row-span-1 bento-card group">
-<div class="bento-content p-8 flex items-center gap-4">
-<span class="material-symbols-outlined text-primary text-3xl">devices</span>
-<h3 class="text-lg font-bold text-white">Truly Responsive</h3>
-</div>
-<div class="spotlight"></div>
-</div>
+    <!-- Feature Card 3 -->
+    <div class="glass-panel bg-slate-900/40 p-8 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all duration-300 group hover:-translate-y-1">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-emerald-400 text-3xl">devices</span>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-3">Responsive</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">Optimized for every screen size automatically, from mobile devices to large desktops.</p>
+    </div>
 </div>
 </div>
 </section>
-
-<style>
-/* Magic Bento Styles */
-.bento-card {
-    position: relative;
-    background: rgba(13, 18, 31, 0.8);
-    border: 1px solid rgba(51, 65, 85, 0.3);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.2s ease, border-color 0.2s ease;
-}
-.bento-card:hover {
-    border-color: rgba(16, 185, 129, 0.4);
-}
-.bento-content {
-    position: relative;
-    z-index: 2;
-    height: 100%;
-}
-.spotlight {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-    background: radial-gradient(
-        400px circle at var(--x, 0px) var(--y, 0px),
-        rgba(16, 185, 129, 0.1),
-        transparent 80%
-    );
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-.bento-card:hover .spotlight {
-    opacity: 1;
-}
-</style>
-
-<script>
-// Spotlight Effect for Bento Grid
-document.querySelectorAll('.bento-card').forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        card.style.setProperty('--x', (e.clientX - rect.left) + 'px');
-        card.style.setProperty('--y', (e.clientY - rect.top) + 'px');
-    });
-});
-</script>
 <!-- How it works section -->
-<section id="how-it-works" class="py-32 px-6 bg-background border-t border-outline-variant/10 scroll-mt-20">
+<section id="how-it-works" class="py-32 px-6 bg-transparent border-t border-outline-variant/10 scroll-mt-20">
 <div class="max-w-7xl mx-auto">
 <div class="text-center mb-16">
 <h2 class="text-4xl font-extrabold tracking-tighter text-on-surface mb-4">How it works</h2>
 <p class="text-on-surface-variant max-w-2xl mx-auto">Three simple steps to launch your digital presence with Ez D&d.</p>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-<div class="space-y-4">
-<div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto border border-primary/20">
-<span class="material-symbols-outlined text-primary" data-icon="brush">brush</span>
-</div>
-<h3 class="text-xl font-bold text-on-surface">1. Choose & Design</h3>
-<p class="text-sm text-on-surface-variant">Start with a showcase template or a blank canvas. Drag and drop components to build your vision.</p>
-</div>
-<div class="space-y-4">
-<div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto border border-primary/20">
-<span class="material-symbols-outlined text-primary" data-icon="tune">tune</span>
-</div>
-<h3 class="text-xl font-bold text-on-surface">2. Customize</h3>
-<p class="text-sm text-on-surface-variant">Fine-tune every detail. Change colors, fonts, and layouts with real-time feedback using our property inspector.</p>
-</div>
-<div class="space-y-4">
-<div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto border border-primary/20">
-<span class="material-symbols-outlined text-primary" data-icon="rocket_launch">rocket_launch</span>
-</div>
-<h3 class="text-xl font-bold text-on-surface">3. Launch</h3>
-<p class="text-sm text-on-surface-variant">Hit publish and your site is instantly live on our global edge infrastructure. No hosting setup required.</p>
-</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <!-- Step 1 Card -->
+    <div class="glass-panel bg-slate-900/40 p-8 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all duration-300 group hover:-translate-y-1 text-center">
+        <div class="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-emerald-400 text-3xl">brush</span>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-3">1. Choose & Design</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">Start with a showcase template or a blank canvas. Drag and drop components to build your vision.</p>
+    </div>
+
+    <!-- Step 2 Card -->
+    <div class="glass-panel bg-slate-900/40 p-8 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all duration-300 group hover:-translate-y-1 text-center">
+        <div class="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-emerald-400 text-3xl">tune</span>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-3">2. Customize</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">Fine-tune every detail. Change colors, fonts, and layouts with real-time feedback using our inspector.</p>
+    </div>
+
+    <!-- Step 3 Card -->
+    <div class="glass-panel bg-slate-900/40 p-8 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all duration-300 group hover:-translate-y-1 text-center">
+        <div class="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-emerald-400 text-3xl">rocket_launch</span>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-3">3. Launch</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">Hit publish and your site is instantly live on our global edge infrastructure. No setup required.</p>
+    </div>
 </div>
 </div>
 </section>
@@ -571,6 +471,7 @@ document.querySelectorAll('.bento-card').forEach(card => {
 </div>
 </footer>
 
+</div> <!-- End Content Wrapper -->
 <script>
 // ============ TOAST SYSTEM ============
 function showToast(message, icon = 'check_circle') {
@@ -801,5 +702,169 @@ if (saved) {
     } catch(e) {}
 }
 
+// ============ SHAPE GRID ANIMATION ============
+(function() {
+    const canvas = document.getElementById('hero-shape-grid');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    let w, h;
+        const cellSize = 35; // Higher density like ReactBits
+        let totalOffsetX = 0;
+        let totalOffsetY = 0;
+        const speedX = 0.3;
+        const speedY = -0.3;
+        
+        let mouseX = -1000;
+        let mouseY = -1000;
+        const trails = new Map();
+        
+        function resize() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        }
+        
+        window.addEventListener('resize', resize);
+        resize();
+        
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+        
+        function drawShape(ctx, x, y, size, color, alpha) {
+            ctx.globalAlpha = alpha;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1;
+            
+            // ReactBits style: mostly technical squares/grid points
+            ctx.beginPath();
+            ctx.strokeRect(x - size/2, y - size/2, size, size);
+        }
+        
+        function draw() {
+            ctx.clearRect(0, 0, w, h);
+            totalOffsetX += speedX;
+            totalOffsetY += speedY;
+            const remX = (totalOffsetX % cellSize + cellSize) % cellSize;
+            const remY = (totalOffsetY % cellSize + cellSize) % cellSize;
+            const cols = Math.ceil(w / cellSize) + 2;
+            const rows = Math.ceil(h / cellSize) + 2;
+            const baseColor = 'rgba(148, 163, 184, 0.15)'; 
+            const highlightColor = 'rgba(16, 185, 129, 0.8)';
+            for (let [k, v] of trails.entries()) {
+                if (v <= 0.02) trails.delete(k);
+                else trails.set(k, v - 0.02);
+            }
+            for (let r = -1; r < rows; r++) {
+                for (let c = -1; c < cols; c++) {
+                    const x = c * cellSize + remX;
+                    const y = r * cellSize + remY;
+                    const globalCol = c - Math.floor(totalOffsetX / cellSize);
+                    const globalRow = r - Math.floor(totalOffsetY / cellSize);
+                    const key = `${globalCol},${globalRow}`;
+                    const centerX = x + cellSize / 2;
+                    const centerY = y + cellSize / 2;
+                    const dx = centerX - mouseX;
+                    const dy = centerY - mouseY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const hoverRadius = 180;
+                    if (dist < hoverRadius) {
+                        const intensity = 1 - (dist / hoverRadius);
+                        const current = trails.get(key) || 0;
+                        if (intensity > current) trails.set(key, Math.min(intensity * 1.5, 1));
+                    }
+                    drawShape(ctx, centerX, centerY, 6, baseColor, 1);
+                    const trailAlpha = trails.get(key) || 0;
+                    if (trailAlpha > 0) {
+                        drawShape(ctx, centerX, centerY, 6, highlightColor, trailAlpha);
+                        ctx.shadowBlur = 10 * trailAlpha;
+                        ctx.shadowColor = 'rgba(16, 185, 129, 0.5)';
+                        drawShape(ctx, centerX, centerY, 6.5, highlightColor, trailAlpha);
+                        ctx.shadowBlur = 0;
+                    }
+                }
+            }
+            requestAnimationFrame(draw);
+        }
+    
+    draw();
+})();
+
+// ============ LIGHT RAYS ANIMATION ============
+(function() {
+    const canvas = document.getElementById('light-rays-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    let w, h;
+    const rayCount = 30; // Slightly optimized for landing page
+    const rays = [];
+    
+    function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+        initRays();
+    }
+    
+    class Ray {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = (Math.random() - 0.2) * w; 
+            this.y = -h * 0.2;
+            this.width = 20 + Math.random() * 60;
+            this.length = h * 1.5 + Math.random() * h;
+            this.angle = (Math.PI / 4) + (Math.random() - 0.5) * 0.5;
+            this.speed = 0.0001 + Math.random() * 0.0003;
+            this.phase = Math.random() * Math.PI * 2;
+            this.opacity = 0;
+            this.maxOpacity = 0.02 + Math.random() * 0.05;
+            const isTeal = Math.random() > 0.5;
+            this.color = isTeal ? "45, 212, 191" : "16, 185, 129";
+        }
+        update() {
+            this.angle += this.speed;
+            this.phase += 0.003;
+            this.opacity = (Math.sin(this.phase) + 1) / 2 * this.maxOpacity;
+            if (this.angle > Math.PI * 0.7) this.reset();
+        }
+        draw() {
+            const endX = this.x + Math.cos(this.angle) * this.length;
+            const endY = this.y + Math.sin(this.angle) * this.length;
+            const grad = ctx.createLinearGradient(this.x, this.y, endX, endY);
+            grad.addColorStop(0, `rgba(${this.color}, 0)`);
+            grad.addColorStop(0.3, `rgba(${this.color}, ${this.opacity})`);
+            grad.addColorStop(1, `rgba(${this.color}, 0)`);
+            ctx.save();
+            ctx.beginPath();
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = this.width;
+            ctx.lineCap = 'round';
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+            ctx.restore();
+        }
+    }
+    
+    function initRays() {
+        rays.length = 0;
+        for (let i = 0; i < rayCount; i++) rays.push(new Ray());
+    }
+    
+    function animate() {
+        ctx.clearRect(0, 0, w, h);
+        ctx.globalCompositeOperation = 'lighter';
+        for (let ray of rays) {
+            ray.update();
+            ray.draw();
+        }
+        requestAnimationFrame(animate);
+    }
+    
+    window.addEventListener('resize', resize);
+    resize();
+    animate();
+})();
 </script>
 </body></html>
