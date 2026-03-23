@@ -5,8 +5,9 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Ez D&d - Dashboard</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
@@ -91,10 +92,24 @@
 <a class="text-slate-400 hover:text-slate-100 font-medium tracking-tight text-sm transition-colors" href="builder.html">Editor</a>
 </nav>
 </div>
-<div class="flex items-center gap-4">
-<div class="h-8 w-8 rounded-full overflow-hidden hover:bg-slate-800 transition-colors cursor-pointer active:scale-95 duration-200 flex items-center justify-center" id="profile-btn">
-<span class="material-symbols-outlined text-primary text-3xl" data-icon="account_circle">account_circle</span>
-</div>
+<div class="flex items-center gap-4 relative">
+    <div class="h-8 w-8 rounded-full overflow-hidden hover:bg-slate-800 transition-colors cursor-pointer active:scale-95 duration-200 flex items-center justify-center" id="profile-btn">
+        <span class="material-symbols-outlined text-primary text-3xl" data-icon="account_circle">account_circle</span>
+    </div>
+    
+    <!-- Profile Dropdown -->
+    <div id="profile-dropdown" class="absolute top-10 right-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl py-1 hidden flex-col z-50">
+        <div class="px-4 py-3 border-b border-slate-700">
+            <p class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-0.5">Signed in as</p>
+            <p class="text-sm font-bold text-slate-100 justify-start truncate" id="user-display-name">user@ezdd.app</p>
+        </div>
+        <div class="py-1">
+            <button id="signout-btn" class="w-full text-left px-4 py-2 text-sm font-medium text-red-400 hover:bg-slate-700/50 hover:text-red-300 transition-colors flex items-center gap-3">
+                <span class="material-symbols-outlined text-[18px]">logout</span>
+                Sign Out
+            </button>
+        </div>
+    </div>
 </div>
 </header>
 <!-- Content Canvas -->
@@ -178,6 +193,10 @@
 </footer>
 
 <script>
+const supabaseUrl = 'https://chhbflrwfbpfqllwamho.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaGJmbHJ3ZmJwZnFsbHdhbWhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyOTQ4MDQsImV4cCI6MjA4OTg3MDgwNH0.oqvNbh8Ttr1GSWZAgomrIQswXKO5urdPx5pcOklBRIM';
+const _supabase = typeof supabase !== 'undefined' ? supabase.createClient(supabaseUrl, supabaseKey) : null;
+
 // ========== TOAST ==========
 function showToast(msg, icon = 'check_circle') {
     const t = document.getElementById('toast');
@@ -327,15 +346,55 @@ document.getElementById('search-input').addEventListener('input', (e) => {
 });
 
 // ========== HELP ===========
-document.getElementById('help-btn').addEventListener('click', () => openModal('help-modal'));
+const helpBtn = document.getElementById('help-btn');
+if (helpBtn) helpBtn.addEventListener('click', () => openModal('help-modal'));
 document.getElementById('close-help').addEventListener('click', () => closeModal('help-modal'));
 document.getElementById('help-modal').addEventListener('click', (e) => {
     if (e.target === e.currentTarget) closeModal('help-modal');
 });
 
-// ========== PROFILE ==========
-document.getElementById('profile-btn').addEventListener('click', () => {
-    showToast('Profile: user@ezdd.app', 'account_circle');
+// ========== PROFILE / AUTH ==========
+const profileBtn = document.getElementById('profile-btn');
+const profileDropdown = document.getElementById('profile-dropdown');
+const userDisplayName = document.getElementById('user-display-name');
+const signoutBtn = document.getElementById('signout-btn');
+
+const sessionUser = JSON.parse(localStorage.getItem('ez-dd-user'));
+if (sessionUser && sessionUser.email) {
+    userDisplayName.textContent = sessionUser.email;
+}
+
+profileBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (profileDropdown.classList.contains('hidden')) {
+        profileDropdown.classList.remove('hidden');
+        profileDropdown.classList.add('flex');
+    } else {
+        profileDropdown.classList.add('hidden');
+        profileDropdown.classList.remove('flex');
+    }
+});
+
+document.addEventListener('click', (e) => {
+    if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+        profileDropdown.classList.add('hidden');
+        profileDropdown.classList.remove('flex');
+    }
+});
+
+signoutBtn.addEventListener('click', async () => {
+    signoutBtn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">sync</span> Signing out...`;
+    if (typeof _supabase !== 'undefined' && _supabase) {
+        await _supabase.auth.signOut();
+    }
+    localStorage.removeItem('ez-dd-user');
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('sb-')) {
+            localStorage.removeItem(key);
+        }
+    }
+    window.location.href = 'login.html';
 });
 
 // ========== FOOTER ==========

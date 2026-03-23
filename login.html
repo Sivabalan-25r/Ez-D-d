@@ -5,8 +5,9 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Login | Ez D&d</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
@@ -246,6 +247,10 @@
 </footer>
 
 <script>
+const supabaseUrl = 'https://chhbflrwfbpfqllwamho.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaGJmbHJ3ZmJwZnFsbHdhbWhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyOTQ4MDQsImV4cCI6MjA4OTg3MDgwNH0.oqvNbh8Ttr1GSWZAgomrIQswXKO5urdPx5pcOklBRIM';
+const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
 // ========== TOAST ==========
 function showToast(msg, icon = 'check_circle', isError = false) {
     const t = document.getElementById('toast');
@@ -314,11 +319,23 @@ document.getElementById('login-form').addEventListener('submit', function(e) {
         const btn = document.getElementById('login-submit-btn');
         btn.classList.add('btn-loading');
         btn.textContent = 'Signing in';
-        setTimeout(() => {
-            localStorage.setItem('ez-dd-user', JSON.stringify({ email, loggedIn: true }));
-            showToast('Login successful!', 'login');
-            setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
-        }, 1200);
+        _supabase.auth.signInWithPassword({ email, password })
+            .then(({ data, error }) => {
+                btn.classList.remove('btn-loading');
+                btn.textContent = 'Sign In';
+                if (error) {
+                    showToast(error.message || 'Login failed', 'error', true);
+                } else if (data.user) {
+                    localStorage.setItem('ez-dd-user', JSON.stringify({ email: data.user.email, loggedIn: true }));
+                    showToast('Login successful!', 'login');
+                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
+                }
+            })
+            .catch(err => {
+                btn.classList.remove('btn-loading');
+                btn.textContent = 'Sign In';
+                showToast('Server connection failed', 'error', true);
+            });
     }
 });
 
@@ -394,11 +411,28 @@ document.getElementById('signup-form').addEventListener('submit', function(e) {
         const btn = document.getElementById('signup-submit-btn');
         btn.classList.add('btn-loading');
         btn.textContent = 'Creating account';
-        setTimeout(() => {
-            localStorage.setItem('ez-dd-user', JSON.stringify({ name, email, loggedIn: true }));
-            showToast('Account created successfully!', 'person_add');
-            setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
-        }, 1200);
+
+        _supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { full_name: name } }
+        })
+        .then(({ data, error }) => {
+            btn.classList.remove('btn-loading');
+            btn.textContent = 'Create Account';
+            if (error) {
+                showToast(error.message || 'Signup failed', 'error', true);
+            } else {
+                showToast('Account created successfully! Please login.', 'person_add');
+                document.getElementById('signup-view').classList.add('hidden');
+                document.getElementById('login-view').classList.remove('hidden');
+            }
+        })
+        .catch(err => {
+            btn.classList.remove('btn-loading');
+            btn.textContent = 'Create Account';
+            showToast('Server connection failed', 'error', true);
+        });
     }
 });
 

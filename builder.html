@@ -319,6 +319,15 @@
                     <span class="material-symbols-outlined text-slate-600 !text-[16px] toggle-icon">expand_more</span>
                 </div>
                 <div class="space-y-4" id="typo-content">
+                    <div class="space-y-1 mb-3">
+                        <label class="text-[9px] uppercase font-bold text-slate-600 tracking-wider">Family</label>
+                        <select id="font-family-select" class="w-full h-9 bg-slate-900 border border-slate-800 rounded px-2 text-[11px] text-slate-300 focus:border-emerald-500/50 outline-none cursor-pointer">
+                            <option value="Inter">Inter</option>
+                            <option value="Arial">Arial</option>
+                            <option value="Georgia">Georgia</option>
+                            <option value="system-ui">System UI</option>
+                        </select>
+                    </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div class="space-y-1">
                             <label class="text-[9px] uppercase font-bold text-slate-600 tracking-wider">Size</label>
@@ -350,11 +359,11 @@
                 </div>
                 <div class="space-y-3" id="color-content">
                     <div class="flex items-center gap-3">
-                        <input type="color" id="color-primary" class="w-8 h-8 rounded border border-slate-800 bg-transparent cursor-pointer">
+                        <input type="color" id="color-primary" value="#ffffff" class="w-8 h-8 rounded border border-slate-800 bg-transparent cursor-pointer">
                         <div class="flex-1"><label class="text-[9px] uppercase font-bold text-slate-600 block">Text</label><span id="color-primary-hex" class="text-[10px] font-mono text-slate-400">#FFFFFF</span></div>
                     </div>
                     <div class="flex items-center gap-3">
-                        <input type="color" id="color-bg" class="w-8 h-8 rounded border border-slate-800 bg-transparent cursor-pointer">
+                        <input type="color" id="color-bg" value="#000000" class="w-8 h-8 rounded border border-slate-800 bg-transparent cursor-pointer">
                         <div class="flex-1"><label class="text-[9px] uppercase font-bold text-slate-600 block">Background</label><span id="color-bg-hex" class="text-[10px] font-mono text-slate-400">#000000</span></div>
                     </div>
                 </div>
@@ -755,6 +764,7 @@ function selectEl(idx, isShift = false) {
     } else if (selectedIndices.length > 1) {
         document.getElementById('inspector-target').textContent = `${selectedIndices.length} items selected`;
     }
+    updateInspector();
 }
 
 function addToCanvas(type) {
@@ -1326,8 +1336,10 @@ function updateInspector() {
         
         const rgbToHex = (rgb) => {
             if (!rgb) return "#000000";
+            if (rgb.startsWith('#')) return rgb.toUpperCase();
+            if (rgb === "transparent" || rgb === "rgba(0, 0, 0, 0)") return "#000000";
             const res = rgb.match(/\d+/g);
-            return res ? "#" + res.slice(0, 3).map(x => parseInt(x).toString(16).padStart(2, '0')).join('').toUpperCase() : "#000000";
+            return (res && res.length >= 3) ? "#" + res.slice(0, 3).map(x => parseInt(x).toString(16).padStart(2, '0')).join('').toUpperCase() : "#000000";
         };
         document.getElementById('color-primary').value = rgbToHex(styles.color);
         document.getElementById('color-primary-hex').textContent = rgbToHex(styles.color);
@@ -1352,6 +1364,7 @@ function updateInspector() {
 
 // ========== INITIALIZATION ==========
 renderElements();
+updateInspector();
 
 
 
