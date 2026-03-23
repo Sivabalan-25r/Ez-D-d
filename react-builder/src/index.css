@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased font-sans m-0 p-0 overflow-hidden;
+  }
+}
+
+.builder-element {
+  @apply relative transition-all duration-200 border-2 border-transparent;
+  min-height: 24px;
+}
+
+.builder-element:hover {
+  @apply border-emerald-500/30;
+}
+
+.builder-element.selected {
+  @apply border-emerald-500 z-10;
+}
+
+.el-label {
+  @apply absolute -top-3 left-2 bg-emerald-500 text-slate-950 text-[8px] font-bold uppercase px-1 rounded opacity-0 transition-opacity whitespace-nowrap pointer-events-none;
+}
+
+.builder-element:hover > .el-label,
+.builder-element.selected > .el-label {
+  @apply opacity-100;
+}
