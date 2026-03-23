@@ -1,94 +1,120 @@
 const fetch = require('node-fetch');
 require('dotenv').config();
 
-// ── Primary: Gemini 2.5 Flash-Lite ─────────────────────────────
+// ── AI Provider Wrapper with Timeout Control ───────────────────
+async function fetchWithTimeout(url, options, timeout = 10000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
+  }
+}
+
+// ── Primary: Gemini 2.0 Flash ──────────────────────────────────
 async function generateWithGemini(prompt) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
-
-  const response = await fetch(url, {
+  console.log('[AI_ENGINE] Summoning Gemini 2.0 Flash...');
+  const response = await fetchWithTimeout(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      contents: [{
-        parts: [{ text: prompt }]
-      }],
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 2048,
-      }
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
     })
   });
-
   if (!response.ok) {
     const error = await response.json();
     throw { status: response.status, error };
   }
-
   const data = await response.json();
   return data.candidates[0].content.parts[0].text;
 }
 
-// ── Fallback: Groq (Llama 3) ─────────────────────────────────
+// ── Secondary: Groq (Mixtral) Fallback ─────────────────────────
 async function generateWithGroq(prompt) {
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const url = 'https://api.groq.com/openai/v1/chat/completions';
+  console.log('[AI_ENGINE] Summoning Groq (Mixtral) Fallback...');
+  const response = await fetchWithTimeout(url, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
+      model: 'mixtral-8x7b-32768',
       messages: [
-        {
-          role: 'system',
-          content: 'You are a frontend code generator. Output ONLY raw HTML+CSS+JS. No markdown. No explanation. No code fences.'
-        },
+        { role: 'system', content: 'You are a technical UI generator. Output ONLY clean HTML with Tailwind CSS. No explanations.' },
         { role: 'user', content: prompt }
       ],
       max_tokens: 2048,
-      temperature: 0.7,
+      temperature: 0.6,
     })
-  });
-
+  }, 8000); // 8s for speed fallback
+  if (!response.ok) {
+    const error = await response.json();
+    throw { status: response.status, error };
+  }
   const data = await response.json();
   return data.choices[0].message.content;
 }
 
-// ── Main function with automatic fallback ───────────────────
-async function generateComponent(userPrompt) {
-  const systemPrompt = `
-    You are an expert frontend developer.
-    Generate a responsive HTML component based on the user's description.
-    Rules:
-    - Output ONLY the raw HTML block (no <html>, <head>, or <body> tags)
-    - Use Tailwind CSS for styling where possible (assuming CDN is provided in parent)
-    - Otherwise, include all CSS inside a <style> tag within the component
-    - Use modern, clean design with subtle shadows and rounded corners
-    - Make it mobile-responsive
-    - Use the color scheme: teal (#0D9488) and blue (#2563EB) as accents
-    - No JavaScript unless the user specifically asks for it
-    
-    User request: ${userPrompt}
-  `;
+function cleanHTML(html) {
+  return html.replace(/```html/g, "").replace(/```/g, "").trim();
+}
+
+async function generateComponent(config) {
+  const { type, theme = 'dark', userPrompt = "" } = config;
+  const start = Date.now();
+  const systemPrompt = `Archetype: ${type}\nTheme: ${theme}\nRequest: ${userPrompt}\nRules: Valid Tailwind HTML ONLY. Wrap in <section>. No MKDN.`;
 
   try {
-    console.log('Trying Gemini 2.0 Flash...');
     const result = await generateWithGemini(systemPrompt);
-    console.log('Gemini succeeded ✅');
-    return { html: result, source: 'gemini' };
+    console.log(`[AI_ENGINE] Gemini Success (${Date.now() - start}ms) ✅`);
+    return { html: cleanHTML(result), source: 'gemini' };
   } catch (err) {
-    if (err.status === 429 || err.status === 400) {
-      console.log('Gemini rate limited or error. Switching to Groq...');
-      try {
-        const result = await generateWithGroq(systemPrompt);
-        console.log('Groq succeeded ✅');
-        return { html: result, source: 'groq' };
-      } catch (groqErr) {
-        throw new Error('Both AI providers failed. Try again in a moment.');
-      }
+    console.warn(`[AI_ENGINE] Gemini Failed/Timed Out. Status: ${err.status || 'TIMEOUT'}. Re-routing...`);
+    try {
+      const groqStart = Date.now();
+      const result = await generateWithGroq(systemPrompt);
+      console.log(`[AI_ENGINE] Groq Fallback Success (${Date.now() - groqStart}ms) 🛡️`);
+      return { html: cleanHTML(result), source: 'groq' };
+    } catch (groqErr) {
+      console.error('[AI_ENGINE] CRITICAL: Both AI Providers Offline.');
+      throw new Error('AI Overload - Our oracles are currently at capacity.');
     }
-    throw err;
   }
 }
 
-module.exports = { generateComponent };
+async function refineComponent(html, instruction) {
+  const start = Date.now();
+  const refinePrompt = `
+  Existing Code:
+  ${html}
+  
+  Instructions for Evolution:
+  ${instruction}
+  
+  Strict Rules:
+  - Preserve all functional parts (HREF, IDs, Images)
+  - Output ONLY the updated raw HTML
+  - No markdown, no explanations
+  - Keep Tailwind CSS context.
+  `;
+
+  try {
+    const result = await generateWithGemini(refinePrompt);
+    console.log(`[AI_REFINE] Gemini Success (${Date.now() - start}ms) ✅`);
+    return { html: cleanHTML(result), source: 'gemini' };
+  } catch (err) {
+    console.warn(`[AI_REFINE] Gemini Fallback to Groq...`);
+    const result = await generateWithGroq(refinePrompt);
+    return { html: cleanHTML(result), source: 'groq' };
+  }
+}
+
+module.exports = { generateComponent, refineComponent };

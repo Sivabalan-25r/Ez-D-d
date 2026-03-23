@@ -87,12 +87,13 @@
         .modal-overlay.active .modal-box { transform: scale(1); }
     </style>
 </head>
-<body class="bg-background text-on-surface selection:bg-primary/30 selection:text-primary">
+<body class="text-on-surface selection:bg-primary/30 selection:text-primary overflow-x-hidden">
+<!-- Absolute Background Color Layer -->
+<div class="fixed inset-0 bg-[#020617] z-[-10]"></div>
 <main class="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
-<!-- Abstract Light Rays Background Component -->
-<div class="fixed inset-0 z-0 bg-background overflow-hidden" style="perspective: 1000px;">
-    <!-- We will draw the rays via CSS and JS on this canvas -->
-    <canvas id="light-rays-canvas" class="w-full h-full opacity-60"></canvas>
+<!-- Interactive Atmospheric Ecosystem -->
+<canvas id="hero-shape-grid" class="fixed inset-0 pointer-events-none opacity-80 z-[-5]"></canvas>
+<canvas id="light-rays-canvas" class="fixed inset-0 pointer-events-none opacity-40 z-[-4]"></canvas>
     
     <!-- Retain slight colored glowing blur behind the cards -->
     <div class="absolute top-[10%] left-[20%] w-[30%] h-[40%] bg-emerald-900/10 rounded-full mix-blend-screen filter blur-[100px] opacity-40"></div>
@@ -296,7 +297,9 @@ document.getElementById('toggle-password').addEventListener('click', () => {
 });
 
 // ========== LOGIN FORM ==========
-document.getElementById('login-form').addEventListener('submit', function(e) {
+const API_URL = 'http://localhost:5000/api';
+
+document.getElementById('login-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     let valid = true;
     const email = document.getElementById('email').value.trim();
@@ -315,12 +318,35 @@ document.getElementById('login-form').addEventListener('submit', function(e) {
     if (valid) {
         const btn = document.getElementById('login-submit-btn');
         btn.classList.add('btn-loading');
-        btn.textContent = 'Signing in';
-        setTimeout(() => {
+        btn.textContent = 'Authenticating';
+        
+        try {
+            // Real backend call
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('ez-dd-user', JSON.stringify({ email, token: data.token || 'fake-jwt', loggedIn: true }));
+                showToast('Welcome back!', 'login');
+                setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+            } else {
+                showToast(data.message || 'Login failed', 'error_outline', true);
+            }
+        } catch (err) {
+            console.error('Auth Error:', err);
+            showToast('Auth server unreachable', 'error', true);
+            // Fallback for demo if backend is cold
             localStorage.setItem('ez-dd-user', JSON.stringify({ email, loggedIn: true }));
-            showToast('Login successful!', 'login');
-            setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
-        }, 1200);
+            setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+        } finally {
+            btn.classList.remove('btn-loading');
+            btn.textContent = 'Sign In';
+        }
     }
 });
 
@@ -415,9 +441,89 @@ document.addEventListener('keydown', (e) => {
 });
 </script>
 
-<!-- Light Rays Animation Script -->
+<!-- Background Animations Script -->
 <script>
-    (function() {
+// ============ SHAPE GRID ANIMATION ============
+(function() {
+    const canvas = document.getElementById('hero-shape-grid');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let w, h;
+    const cellSize = 35;
+    let totalOffsetX = 0;
+    let totalOffsetY = 0;
+    const speedX = 0.3;
+    const speedY = -0.3;
+    let mouseX = -1000;
+    let mouseY = -1000;
+    const trails = new Map();
+    function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+    function drawShape(ctx, x, y, size, color, alpha) {
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.strokeRect(x - size/2, y - size/2, size, size);
+    }
+    function draw() {
+        ctx.clearRect(0, 0, w, h);
+        totalOffsetX += speedX;
+        totalOffsetY += speedY;
+        const remX = (totalOffsetX % cellSize + cellSize) % cellSize;
+        const remY = (totalOffsetY % cellSize + cellSize) % cellSize;
+        const cols = Math.ceil(w / cellSize) + 2;
+        const rows = Math.ceil(h / cellSize) + 2;
+        const baseColor = 'rgba(148, 163, 184, 0.15)'; 
+        const highlightColor = 'rgba(16, 185, 129, 0.8)';
+        for (let [k, v] of trails.entries()) {
+            if (v <= 0.02) trails.delete(k);
+            else trails.set(k, v - 0.02);
+        }
+        for (let r = -1; r < rows; r++) {
+            for (let c = -1; c < cols; c++) {
+                const x = c * cellSize + remX;
+                const y = r * cellSize + remY;
+                const globalCol = c - Math.floor(totalOffsetX / cellSize);
+                const globalRow = r - Math.floor(totalOffsetY / cellSize);
+                const key = `${globalCol},${globalRow}`;
+                const centerX = x + cellSize / 2;
+                const centerY = y + cellSize / 2;
+                const dx = centerX - mouseX;
+                const dy = centerY - mouseY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const hoverRadius = 180;
+                if (dist < hoverRadius) {
+                    const intensity = 1 - (dist / hoverRadius);
+                    const current = trails.get(key) || 0;
+                    if (intensity > current) trails.set(key, Math.min(intensity * 1.5, 1));
+                }
+                drawShape(ctx, centerX, centerY, 6, baseColor, 1);
+                const trailAlpha = trails.get(key) || 0;
+                if (trailAlpha > 0) {
+                    drawShape(ctx, centerX, centerY, 6, highlightColor, trailAlpha);
+                    ctx.shadowBlur = 10 * trailAlpha;
+                    ctx.shadowColor = 'rgba(16, 185, 129, 0.5)';
+                    drawShape(ctx, centerX, centerY, 6.5, highlightColor, trailAlpha);
+                    ctx.shadowBlur = 0;
+                }
+            }
+        }
+        requestAnimationFrame(draw);
+    }
+    draw();
+})();
+
+// ============ LIGHT RAYS ANIMATION ============
+(function() {
         const canvas = document.getElementById('light-rays-canvas');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');

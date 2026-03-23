@@ -99,9 +99,13 @@ html { scroll-behavior: smooth; }
         .sidebar-item:active { transform: scale(0.96); opacity: 0.7; }
     </style>
 </head>
-<body class="bg-background text-on-surface font-body selection:bg-primary/20">
-<!-- Interactive Shape Grid Background (Fixed for full page) -->
-<canvas id="hero-shape-grid" class="fixed inset-0 pointer-events-none opacity-60 z-[-10]" style="background:#020617;"></canvas>
+<body class="text-on-surface font-body selection:bg-primary/20 overflow-x-hidden">
+<!-- Absolute Background Color Layer -->
+<div class="fixed inset-0 bg-[#020617] z-[-10]"></div>
+<!-- Interactive Atmospheric Ecosystem -->
+<canvas id="hero-shape-grid" class="fixed inset-0 pointer-events-none opacity-80 z-[-5]"></canvas>
+<canvas id="light-rays-canvas" class="fixed inset-0 pointer-events-none opacity-40 z-[-4]"></canvas>
+<div class="relative z-10"> <!-- Content Wrapper -->
 <!-- TopNavBar (Shared Component) -->
 <header class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl flex justify-between items-center px-6 h-16 shadow-[0_10px_40px_rgba(0,0,0,0.3)] border-b border-outline-variant/50">
 <a href="index.html" class="text-xl font-bold tracking-tighter text-on-surface cursor-pointer hover:text-primary transition-colors">Ez D&d</a>
@@ -119,8 +123,9 @@ html { scroll-behavior: smooth; }
 <main class="pt-16 pb-20">
 <!-- Hero Section -->
 <section class="relative min-h-[921px] flex flex-col items-center justify-center px-6 overflow-hidden bg-transparent">
-<div class="absolute inset-0 bg-gradient-to-b from-transparent to-background/50 pointer-events-none z-10"></div>
-<div class="relative z-10 max-w-4xl text-center mb-16">
+<!-- Unified Atmospheric Overlay (Lighter) -->
+<div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#020617]/20 pointer-events-none z-10"></div>
+<div class="relative z-20 max-w-4xl text-center mb-16">
 
 <h1 class="text-6xl md:text-8xl font-extrabold tracking-tighter text-on-surface mb-8 leading-[0.9]">
                 Build the Future, <br/><span class="text-primary">No Code Required.</span>
@@ -466,6 +471,7 @@ html { scroll-behavior: smooth; }
 </div>
 </footer>
 
+</div> <!-- End Content Wrapper -->
 <script>
 // ============ TOAST SYSTEM ============
 function showToast(message, icon = 'check_circle') {
@@ -703,113 +709,162 @@ if (saved) {
     const ctx = canvas.getContext('2d');
     
     let w, h;
-    const cellSize = 50;
-    let totalOffsetX = 0;
-    let totalOffsetY = 0;
-    const speedX = 0.5;
-    const speedY = -0.5;
+        const cellSize = 35; // Higher density like ReactBits
+        let totalOffsetX = 0;
+        let totalOffsetY = 0;
+        const speedX = 0.3;
+        const speedY = -0.3;
+        
+        let mouseX = -1000;
+        let mouseY = -1000;
+        const trails = new Map();
+        
+        function resize() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        }
+        
+        window.addEventListener('resize', resize);
+        resize();
+        
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+        
+        function drawShape(ctx, x, y, size, color, alpha) {
+            ctx.globalAlpha = alpha;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1;
+            
+            // ReactBits style: mostly technical squares/grid points
+            ctx.beginPath();
+            ctx.strokeRect(x - size/2, y - size/2, size, size);
+        }
+        
+        function draw() {
+            ctx.clearRect(0, 0, w, h);
+            totalOffsetX += speedX;
+            totalOffsetY += speedY;
+            const remX = (totalOffsetX % cellSize + cellSize) % cellSize;
+            const remY = (totalOffsetY % cellSize + cellSize) % cellSize;
+            const cols = Math.ceil(w / cellSize) + 2;
+            const rows = Math.ceil(h / cellSize) + 2;
+            const baseColor = 'rgba(148, 163, 184, 0.15)'; 
+            const highlightColor = 'rgba(16, 185, 129, 0.8)';
+            for (let [k, v] of trails.entries()) {
+                if (v <= 0.02) trails.delete(k);
+                else trails.set(k, v - 0.02);
+            }
+            for (let r = -1; r < rows; r++) {
+                for (let c = -1; c < cols; c++) {
+                    const x = c * cellSize + remX;
+                    const y = r * cellSize + remY;
+                    const globalCol = c - Math.floor(totalOffsetX / cellSize);
+                    const globalRow = r - Math.floor(totalOffsetY / cellSize);
+                    const key = `${globalCol},${globalRow}`;
+                    const centerX = x + cellSize / 2;
+                    const centerY = y + cellSize / 2;
+                    const dx = centerX - mouseX;
+                    const dy = centerY - mouseY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const hoverRadius = 180;
+                    if (dist < hoverRadius) {
+                        const intensity = 1 - (dist / hoverRadius);
+                        const current = trails.get(key) || 0;
+                        if (intensity > current) trails.set(key, Math.min(intensity * 1.5, 1));
+                    }
+                    drawShape(ctx, centerX, centerY, 6, baseColor, 1);
+                    const trailAlpha = trails.get(key) || 0;
+                    if (trailAlpha > 0) {
+                        drawShape(ctx, centerX, centerY, 6, highlightColor, trailAlpha);
+                        ctx.shadowBlur = 10 * trailAlpha;
+                        ctx.shadowColor = 'rgba(16, 185, 129, 0.5)';
+                        drawShape(ctx, centerX, centerY, 6.5, highlightColor, trailAlpha);
+                        ctx.shadowBlur = 0;
+                    }
+                }
+            }
+            requestAnimationFrame(draw);
+        }
     
-    let mouseX = -1000;
-    let mouseY = -1000;
-    const trails = new Map();
+    draw();
+})();
+
+// ============ LIGHT RAYS ANIMATION ============
+(function() {
+    const canvas = document.getElementById('light-rays-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    let w, h;
+    const rayCount = 30; // Slightly optimized for landing page
+    const rays = [];
     
     function resize() {
         w = canvas.width = window.innerWidth;
         h = canvas.height = window.innerHeight;
+        initRays();
+    }
+    
+    class Ray {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = (Math.random() - 0.2) * w; 
+            this.y = -h * 0.2;
+            this.width = 20 + Math.random() * 60;
+            this.length = h * 1.5 + Math.random() * h;
+            this.angle = (Math.PI / 4) + (Math.random() - 0.5) * 0.5;
+            this.speed = 0.0001 + Math.random() * 0.0003;
+            this.phase = Math.random() * Math.PI * 2;
+            this.opacity = 0;
+            this.maxOpacity = 0.02 + Math.random() * 0.05;
+            const isTeal = Math.random() > 0.5;
+            this.color = isTeal ? "45, 212, 191" : "16, 185, 129";
+        }
+        update() {
+            this.angle += this.speed;
+            this.phase += 0.003;
+            this.opacity = (Math.sin(this.phase) + 1) / 2 * this.maxOpacity;
+            if (this.angle > Math.PI * 0.7) this.reset();
+        }
+        draw() {
+            const endX = this.x + Math.cos(this.angle) * this.length;
+            const endY = this.y + Math.sin(this.angle) * this.length;
+            const grad = ctx.createLinearGradient(this.x, this.y, endX, endY);
+            grad.addColorStop(0, `rgba(${this.color}, 0)`);
+            grad.addColorStop(0.3, `rgba(${this.color}, ${this.opacity})`);
+            grad.addColorStop(1, `rgba(${this.color}, 0)`);
+            ctx.save();
+            ctx.beginPath();
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = this.width;
+            ctx.lineCap = 'round';
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+            ctx.restore();
+        }
+    }
+    
+    function initRays() {
+        rays.length = 0;
+        for (let i = 0; i < rayCount; i++) rays.push(new Ray());
+    }
+    
+    function animate() {
+        ctx.clearRect(0, 0, w, h);
+        ctx.globalCompositeOperation = 'lighter';
+        for (let ray of rays) {
+            ray.update();
+            ray.draw();
+        }
+        requestAnimationFrame(animate);
     }
     
     window.addEventListener('resize', resize);
     resize();
-    
-    document.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-    });
-    
-    function drawShape(ctx, x, y, size, type, color, alpha) {
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = color;
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.5;
-        
-        ctx.beginPath();
-        if (type === 'plus') {
-            const s = size / 2;
-            ctx.moveTo(x, y - s);
-            ctx.lineTo(x, y + s);
-            ctx.moveTo(x - s, y);
-            ctx.lineTo(x + s, y);
-            ctx.stroke();
-        } else if (type === 'dot') {
-            ctx.arc(x, y, size / 3, 0, Math.PI * 2);
-            ctx.fill();
-        } else {
-            ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-            ctx.stroke();
-        }
-    }
-    
-    function draw() {
-        ctx.clearRect(0, 0, w, h);
-        
-        totalOffsetX += speedX;
-        totalOffsetY += speedY;
-        
-        const remX = (totalOffsetX % cellSize + cellSize) % cellSize;
-        const remY = (totalOffsetY % cellSize + cellSize) % cellSize;
-        
-        const cols = Math.ceil(w / cellSize) + 2;
-        const rows = Math.ceil(h / cellSize) + 2;
-        
-        const baseColor = 'rgba(148, 163, 184, 0.25)';
-        const highlightColor = 'rgba(16, 185, 129, 0.9)';
-        
-        for (let [k, v] of trails.entries()) {
-            if (v <= 0.02) trails.delete(k);
-            else trails.set(k, v - 0.02);
-        }
-        
-        for (let r = -1; r < rows; r++) {
-            for (let d = -1; d < cols; d++) {
-                const x = d * cellSize + remX;
-                const y = r * cellSize + remY;
-                
-                const globalCol = d - Math.floor(totalOffsetX / cellSize);
-                const globalRow = r - Math.floor(totalOffsetY / cellSize);
-                const key = `${globalCol},${globalRow}`;
-                
-                const centerX = x + cellSize / 2;
-                const centerY = y + cellSize / 2;
-                
-                const dx = centerX - mouseX;
-                const dy = centerY - mouseY;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                
-                const hoverRadius = 200;
-                if (dist < hoverRadius) {
-                    const intensity = 1 - (dist / hoverRadius);
-                    const current = trails.get(key) || 0;
-                    if (intensity > current) {
-                        trails.set(key, Math.min(intensity * 1.5, 1));
-                    }
-                }
-                
-                const shapeIndex = Math.abs(globalCol * 3 + globalRow * 7) % 3;
-                const type = shapeIndex === 0 ? 'plus' : shapeIndex === 1 ? 'dot' : 'circle';
-                
-                drawShape(ctx, centerX, centerY, 8, type, baseColor, 1);
-                
-                const trailAlpha = trails.get(key) || 0;
-                if (trailAlpha > 0) {
-                    drawShape(ctx, centerX, centerY, 8 + (trailAlpha * 2), type, highlightColor, trailAlpha);
-                }
-            }
-        }
-        
-        requestAnimationFrame(draw);
-    }
-    
-    draw();
+    animate();
 })();
 </script>
 </body></html>

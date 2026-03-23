@@ -1,47 +1,51 @@
 const express = require('express');
 const router = express.Router();
-const Project = require('../models/Project');
+
+// Memory-Only Store (Stateless fallback)
+let projectsMock = [];
 
 // Create new project
-router.post('/', async (req, res) => {
+router.post('/', (req, res) => {
     try {
         const { userId, projectName, canvasData } = req.body;
-        const project = new Project({ userId, projectName, canvasData });
-        await project.save();
-        res.status(201).json(project);
+        const newProject = {
+            _id: 'proj-' + Date.now(),
+            userId,
+            projectName,
+            canvasData,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+        projectsMock.push(newProject);
+        res.status(201).json(newProject);
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
 });
 
 // Get user projects
-router.get('/:userId', async (req, res) => {
-    try {
-        const projects = await Project.find({ userId: req.params.userId }).sort({ updatedAt: -1 });
-        res.json(projects);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+router.get('/:userId', (req, res) => {
+    res.json(projectsMock.filter(p => p.userId === req.params.userId));
 });
 
 // Update project
-router.put('/:id', async (req, res) => {
+router.put('/:id', (req, res) => {
     try {
-        const project = await Project.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.json(project);
+        const idx = projectsMock.findIndex(p => p._id === req.params.id);
+        if (idx !== -1) {
+            projectsMock[idx] = { ...projectsMock[idx], ...req.body, updatedAt: new Date() };
+            return res.json(projectsMock[idx]);
+        }
+        res.status(404).json({ error: 'Project not found' });
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
 });
 
 // Delete project
-router.delete('/:id', async (req, res) => {
-    try {
-        await Project.findByIdAndDelete(req.params.id);
-        res.json({ message: "Project deleted successfully" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+router.delete('/:id', (req, res) => {
+    projectsMock = projectsMock.filter(p => p._id !== req.params.id);
+    res.json({ message: "Project deleted from memory" });
 });
 
 module.exports = router;

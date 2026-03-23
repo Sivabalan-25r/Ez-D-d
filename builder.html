@@ -247,25 +247,85 @@
 
 <!-- AI Integration Tab -->
 <div class="px-4 mb-4">
-    <div class="bg-gradient-to-br from-emerald-500/10 to-blue-500/10 border border-emerald-500/20 rounded-lg p-3 space-y-3">
+    <div class="bg-gradient-to-br from-emerald-500/10 to-blue-500/10 border border-emerald-500/20 rounded-lg p-3 space-y-4">
         <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-emerald-400 !text-[16px] animate-pulse">auto_awesome</span>
             <span class="text-[10px] uppercase tracking-[0.2em] text-slate-300 font-bold">AI Oracle</span>
         </div>
-        <textarea id="ai-prompt" placeholder="Ask AI to build a 'pricing table' or 'modern nav'..." class="w-full h-16 bg-slate-950/50 border border-slate-800 rounded p-2 text-[10px] text-slate-300 focus:border-emerald-500/50 focus:outline-none resize-none placeholder:text-slate-700"></textarea>
-        <button id="ai-gen-btn" class="w-full h-7 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 overflow-hidden group">
+
+        <!-- Prompt Templates -->
+        <div class="space-y-2">
+            <label class="text-[9px] uppercase font-bold text-slate-600">Quick Templates</label>
+            <div class="flex flex-wrap gap-1.5">
+                <button class="px-2 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-[9px] font-bold text-emerald-400 rounded-sm border border-emerald-500/20 transition-colors template-btn" data-type="hero" data-prompt="High-impact hero section with a bold headline, minimalist subtitle, and clear primary CTA button.">Hero</button>
+                <button class="px-2 py-1 bg-blue-500/10 hover:bg-blue-500/20 text-[9px] font-bold text-blue-400 rounded-sm border border-blue-500/20 transition-colors template-btn" data-type="features" data-prompt="3-column features grid with modern icons, clean titles, and concise descriptions.">Features</button>
+                <button class="px-2 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-[9px] font-bold text-amber-400 rounded-sm border border-amber-500/20 transition-colors template-btn" data-type="pricing" data-prompt="Professional 3-tier pricing table with 'Standard', 'Pro-Select', and 'Enterprise' plans. Clear feature checklists.">Pricing</button>
+                <button class="px-2 py-1 bg-slate-500/10 hover:bg-slate-500/20 text-[9px] font-bold text-slate-400 rounded-sm border border-slate-500/20 transition-colors template-btn" data-type="custom" data-prompt="Modern minimalist footer with brand logo, quick links, and social icons.">Footer</button>
+            </div>
+        </div>
+        
+        <div class="space-y-2">
+            <label class="text-[9px] uppercase font-bold text-slate-600 block">Archetype</label>
+            <select id="ai-type" class="w-full h-7 bg-slate-950/50 border border-slate-800 rounded px-2 text-[10px] text-slate-300 focus:border-emerald-500/50 focus:outline-none cursor-pointer">
+                <option value="hero">Hero Section</option>
+                <option value="features">Features Grid</option>
+                <option value="pricing">Pricing Table</option>
+                <option value="full-page">Genesis Full Page</option>
+                <option value="custom">Custom Component</option>
+            </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+            <div class="space-y-1">
+                <label class="text-[9px] uppercase font-bold text-slate-600">Theme</label>
+                <select id="ai-theme" class="w-full h-7 bg-slate-950/50 border border-slate-800 rounded px-1 text-[10px] text-slate-300 focus:outline-none">
+                    <option value="dark">Dark</option>
+                    <option value="light">Light</option>
+                </select>
+            </div>
+            <div class="space-y-1">
+                <label class="text-[9px] uppercase font-bold text-slate-600">Columns</label>
+                <select id="ai-columns" class="w-full h-7 bg-slate-950/50 border border-slate-800 rounded px-1 text-[10px] text-slate-300 focus:outline-none">
+                    <option value="1">1 Col</option>
+                    <option value="2">2 Col</option>
+                    <option value="3">3 Col</option>
+                </select>
+            </div>
+        </div>
+
+        <textarea id="ai-prompt" placeholder="Describe specifics (e.g. 'Space tech theme', '3 cards')..." class="w-full h-16 bg-slate-950/50 border border-slate-800 rounded p-2 text-[10px] text-slate-300 focus:border-emerald-500/50 focus:outline-none resize-none placeholder:text-slate-700"></textarea>
+        
+        <button id="ai-gen-btn" class="w-full h-8 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
             <span class="gen-text">Generate Magic</span>
-            <span class="material-symbols-outlined !text-[14px] group-hover:rotate-45 transition-transform">bolt</span>
+            <span class="material-symbols-outlined !text-[14px]">bolt</span>
         </button>
     </div>
 </div>
 
-<div class="relative mt-3 px-4">
+<div class="px-4 mb-3">
+    <button onclick="saveSelectedToLibrary()" class="w-full h-8 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 rounded-md text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 group">
+        <span class="material-symbols-outlined !text-[14px]">bookmark</span>
+        <span>Stash to Library</span>
+    </button>
+</div>
+
+<div class="relative mt-1 px-4">
 <input type="text" placeholder="Search components..." id="comp-search" class="w-full h-7 pl-7 pr-2 bg-slate-900 border border-slate-800 rounded-sm text-[10px] text-slate-300 focus:border-emerald-500/50 focus:outline-none placeholder:text-slate-600">
 <span class="material-symbols-outlined absolute left-5.5 top-1 text-slate-600 !text-[16px]">search</span>
 </div>
 </div>
 <div class="flex-1 overflow-y-auto p-3 pb-8 space-y-1" id="comp-panel">
+<!-- SAVED COMPONENTS -->
+<div class="comp-group" data-group="saved" id="saved-group-section">
+<div class="comp-header flex items-center justify-between p-2 rounded-sm cursor-pointer hover:bg-slate-900 transition-colors" data-toggle="saved">
+<div class="flex items-center gap-2"><span class="material-symbols-outlined text-blue-400 !text-[16px]">stars</span><span class="text-[10px] uppercase tracking-[0.2em] text-blue-400 font-bold">Saved Components</span></div>
+<span class="material-symbols-outlined text-slate-600 !text-[14px] toggle-arrow">expand_more</span>
+</div>
+<div class="comp-items pl-2 space-y-0.5 mt-1 hidden" id="saved-items-container">
+    <!-- Saved items will populate here -->
+</div>
+</div>
+
 <!-- LAYOUT -->
 <div class="comp-group" data-group="layout">
 <div class="comp-header flex items-center justify-between p-2 rounded-sm cursor-pointer hover:bg-slate-900 transition-colors" data-toggle="layout">
@@ -548,13 +608,27 @@
             <button id="apply-content-btn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-sm text-[10px] uppercase tracking-[0.2em] font-bold transition-all active:scale-95 shadow-lg shadow-emerald-500/10">Apply Changes</button>
         </div>
 
-        <!-- Extra Tab (Advanced) -->
+        <!-- AI & Extra Tab -->
         <div class="flex-1 overflow-y-auto p-5 pb-16 space-y-8 inspector-content hidden" id="tab-extra">
+            <section id="ai-refine-section" class="bg-gradient-to-br from-emerald-500/5 to-blue-500/5 border border-emerald-500/10 rounded-lg p-4 space-y-4">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-400">Section Mutation (AI)</span>
+                    <span class="material-symbols-outlined text-emerald-400 !text-[16px] animate-pulse">magic_button</span>
+                </div>
+                <p class="text-[9px] text-slate-500 font-medium">Describe changes for this specific section.</p>
+                <textarea id="ai-refine-prompt" placeholder="E.g. 'Add 3 more grid items', 'Make hero text centered'..." class="w-full h-20 bg-slate-950/50 border border-slate-800 rounded p-2 text-[10px] text-slate-300 focus:border-emerald-500/50 focus:outline-none resize-none"></textarea>
+                <button id="ai-refine-btn" class="w-full h-8 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-emerald-500/10">
+                    <span class="refine-text">Magic Refine</span>
+                    <span class="material-symbols-outlined !text-[14px]">bolt</span>
+                </button>
+            </section>
+
             <section>
                 <div class="flex items-center justify-between mb-4 cursor-pointer">
                     <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Animations</span>
                     <span class="material-symbols-outlined text-slate-600 !text-[16px]">auto_awesome</span>
                 </div>
+                <!-- ... existing anim select ... -->
                 <div class="space-y-1">
                     <label class="text-[9px] uppercase font-bold text-slate-600">Entrance</label>
                     <select id="anim-select" class="w-full h-9 bg-slate-900 border border-slate-800 rounded px-2 text-[11px] text-slate-300 outline-none">
@@ -1104,32 +1178,93 @@ function syncPulse() {
     }, 800);
 }
 
+// ========== SAVED COMPONENTS (LIBRARY) ==========
+let savedLibrary = JSON.parse(localStorage.getItem('ez-dd-library') || '[]');
+
+function saveSelectedToLibrary() {
+    if (selectedIndices.length !== 1) {
+        showToast('Select one item to stash', 'error_outline');
+        return;
+    }
+    const idx = selectedIndices[0];
+    const el = elements[idx];
+    
+    // Check for duplicates
+    if (savedLibrary.some(s => s.html === el.html)) {
+        showToast('This is already in your stash!', 'warning');
+        return;
+    }
+
+    const newItem = {
+        name: el.type.toUpperCase() + ' Component',
+        html: el.html,
+        type: el.type
+    };
+    
+    savedLibrary.push(newItem);
+    localStorage.setItem('ez-dd-library', JSON.stringify(savedLibrary));
+    renderSavedComponents();
+    showToast('Stashed to Library!', 'star');
+}
+
+function renderSavedComponents() {
+    const container = document.getElementById('saved-items-container');
+    if (!container) return;
+    
+    if (savedLibrary.length === 0) {
+        container.innerHTML = `<div class="p-3 text-[9px] text-slate-600 italic">No components saved yet.</div>`;
+        return;
+    }
+
+    container.innerHTML = savedLibrary.map((item, i) => `
+        <div class="comp-item flex items-center justify-between p-2 rounded-sm text-slate-400 hover:text-blue-200 hover:bg-slate-900/80 cursor-pointer transition-all active:scale-95 group" onclick="addSavedToCanvas(${i})">
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined !text-[16px]">bookmark_border</span>
+                <span class="text-[10px] font-semibold">${item.name}</span>
+            </div>
+            <button class="opacity-0 group-hover:opacity-100 p-0.5 hover:text-red-400 transition-opacity" onclick="event.stopPropagation(); removeFromLibrary(${i})">
+                <span class="material-symbols-outlined !text-[12px]">close</span>
+            </button>
+        </div>
+    `).join('');
+}
+
+function addSavedToCanvas(idx) {
+    saveHistory();
+    const item = savedLibrary[idx];
+    elements.push({ type: item.type, html: item.html });
+    selectedIndices = [elements.length - 1];
+    renderElements();
+    showToast('Retrieved from Library', 'auto_fix');
+    syncPulse();
+}
+
+function removeFromLibrary(idx) {
+    savedLibrary.splice(idx, 1);
+    localStorage.setItem('ez-dd-library', JSON.stringify(savedLibrary));
+    renderSavedComponents();
+    showToast('Removed from Stash', 'delete');
+}
+
 // ========== SIDEBAR: CATEGORY TOGGLE ==========
 document.querySelectorAll('.comp-header').forEach(header => {
     header.addEventListener('click', () => {
         const group = header.closest('.comp-group');
         const items = group.querySelector('.comp-items');
         const arrow = header.querySelector('.toggle-arrow');
-        const icon = header.querySelector('.material-symbols-outlined:first-child');
-        const label = header.querySelector('span:last-child');
-
+        
         if (items.classList.contains('hidden')) {
             items.classList.remove('hidden');
             arrow.textContent = 'expand_less';
-            icon.classList.remove('text-slate-500');
-            icon.classList.add('text-emerald-400');
-            label.classList.remove('text-slate-500');
-            label.classList.add('text-emerald-400');
         } else {
             items.classList.add('hidden');
             arrow.textContent = 'expand_more';
-            icon.classList.remove('text-emerald-400');
-            icon.classList.add('text-slate-500');
-            label.classList.remove('text-emerald-400');
-            label.classList.add('text-slate-500');
         }
     });
 });
+
+// Initialize Library
+renderSavedComponents();
 
 // ========== SIDEBAR: COMPONENT ITEMS CLICK ==========
 document.querySelectorAll('.comp-item').forEach(item => {
@@ -1908,6 +2043,92 @@ document.getElementById('view-live-btn').addEventListener('click', () => {
     }
 });
 
+// ========== AI PROMPT TEMPLATES ==========
+document.querySelectorAll('.template-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const type = btn.dataset.type;
+        const prompt = btn.dataset.prompt;
+        
+        document.getElementById('ai-type').value = type;
+        document.getElementById('ai-prompt').value = prompt;
+        
+        showToast(`Template ready: ${btn.textContent.toUpperCase()}`, 'auto_fix');
+    });
+});
+
+// ========== AI REFINEMENT LOGIC ==========
+document.getElementById('ai-refine-btn').addEventListener('click', async () => {
+    if (selectedIndices.length !== 1) {
+        showToast('Select one section to refine', 'error');
+        return;
+    }
+
+    const instruction = document.getElementById('ai-refine-prompt').value.trim();
+    if (instruction.length < 5) {
+        showToast('Explain what to change!', 'warning');
+        return;
+    }
+
+    const idx = selectedIndices[0];
+    const el = elements[idx];
+    const btn = document.getElementById('ai-refine-btn');
+    const textSpan = btn.querySelector('.refine-text');
+    const originalText = textSpan.textContent;
+
+    try {
+        btn.disabled = true;
+        textSpan.textContent = 'Refining...';
+        showToast('Summoning AI Refiner...', 'auto_awesome');
+
+        const response = await fetch('http://localhost:5000/api/ai/refine-component', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                existingHTML: el.html, 
+                instruction: instruction 
+            })
+        });
+
+        if (!response.ok) throw new Error('Refinement failed');
+
+        const data = await response.json();
+        
+        if (data.success) {
+            saveHistory();
+            
+            // Safe Structural Update
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = data.html;
+            el.html = tempDiv.innerHTML; // Normalized
+            
+            renderElements();
+            showToast('Section Transformed!', 'magic_button');
+            document.getElementById('ai-refine-prompt').value = '';
+        }
+    } catch (err) {
+        showToast('The AI couldn\'t refine this. Try again.', 'error');
+    } finally {
+        btn.disabled = false;
+        textSpan.textContent = originalText;
+    }
+});
+
+// Update Inspector logic to handle AI Refine section visibility
+const originalUpdateInspector = updateInspector;
+updateInspector = function() {
+    originalUpdateInspector();
+    
+    const refineSection = document.getElementById('ai-refine-section');
+    if (selectedIndices.length === 1 && elements[selectedIndices[0]].type !== 'ai-generated') {
+        // Technically all can be refined if they have HTML
+        refineSection.classList.remove('hidden');
+    } else if (selectedIndices.length === 1) {
+         refineSection.classList.remove('hidden');
+    } else {
+        refineSection.classList.add('hidden');
+    }
+};
+
 // ========== AI ORACLE INTEGRATION ==========
 const AI_ENDPOINT = 'http://localhost:5000/api/ai/generate-component';
 
@@ -1921,44 +2142,71 @@ document.getElementById('ai-gen-btn').addEventListener('click', async () => {
         return;
     }
 
+    // --- UX LOADING START ---
+    const originalText = genText.textContent;
+    btn.disabled = true;
+    genText.textContent = 'Summoning AI...';
+    btn.classList.add('bg-emerald-800', 'cursor-not-allowed', 'opacity-80');
+    
+    // Fallback Timeout Handling (using AbortController)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout for complex AI tasks
+
     try {
-        // Loading State
-        btn.disabled = true;
-        genText.textContent = 'Summoning AI...';
-        btn.classList.add('bg-emerald-800');
-        
         const response = await fetch(AI_ENDPOINT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt })
+            signal: controller.signal,
+            body: JSON.stringify({ 
+                type: document.getElementById('ai-type').value,
+                theme: document.getElementById('ai-theme').value,
+                columns: parseInt(document.getElementById('ai-columns').value),
+                userPrompt: prompt 
+            })
         });
 
-        if (!response.ok) throw new Error('AI Overload - Try again');
+        clearTimeout(timeoutId);
+
+        if (!response.ok) throw new Error('AI Overload');
 
         const data = await response.json();
         
         if (data.success && data.html) {
             saveToUndo();
-            // Create a new section with the AI result
-            const newElement = {
-                type: 'section',
-                style: 'padding: 60px 0; background: #fff;', // Default wrapper
-                html: data.html
-            };
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = data.html; 
             
-            elements.push(newElement);
-            renderElements();
-            showToast('Magic Component Generated!', 'auto_awesome');
+            // Handle Multiple Sections (Multi-Section Generation)
+            const generatedSections = Array.from(tempDiv.children);
+            const typeRequested = document.getElementById('ai-type').value.toUpperCase();
+
+            if (generatedSections.length > 0) {
+                generatedSections.forEach((child, index) => {
+                    const newElement = {
+                        id: 'ai-' + Date.now() + '-' + index,
+                        type: typeRequested === 'FULL-PAGE' ? (child.tagName || 'SECTION') : typeRequested,
+                        style: 'padding: 60px 0; background: #fff;',
+                        html: child.outerHTML
+                    };
+                    elements.push(newElement);
+                });
+                
+                renderElements();
+                showToast(`Constructed ${generatedSections.length} Sections!`, 'auto_awesome');
+            }
+            
             document.getElementById('ai-prompt').value = '';
         }
 
     } catch (err) {
         console.error('AI Error:', err);
-        showToast('The AI was shy. Try another prompt.', 'warning');
+        const isTimeout = err.name === 'AbortError';
+        showToast(isTimeout ? 'AI is taking too long. Please retreat/retry.' : 'Summoning failed. Try another description.', 'warning');
+        genText.textContent = 'Retry Summon'; // Change UI state for retry
     } finally {
         btn.disabled = false;
-        genText.textContent = 'Generate Magic';
-        btn.classList.remove('bg-emerald-800');
+        btn.classList.remove('bg-emerald-800', 'cursor-not-allowed', 'opacity-80');
+        if (!genText.textContent.includes('Retry')) genText.textContent = originalText;
     }
 });
 
