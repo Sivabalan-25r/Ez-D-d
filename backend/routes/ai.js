@@ -83,4 +83,23 @@ router.post('/refine-text', aiGeneratorLimiter, async (req, res) => {
     }
 });
 
+router.post('/analyze-ux', aiGeneratorLimiter, async (req, res) => {
+    try {
+        const { html } = req.body;
+
+        if (!html) {
+            return res.status(400).json({ error: 'HTML component required for analysis.' });
+        }
+
+        const { analyzeUX } = require('../services/aiService');
+        const result = await analyzeUX(html);
+
+        res.json({ success: true, suggestions: result.text, source: result.source });
+
+    } catch (err) {
+        console.error('AI UX Analysis Error:', err);
+        res.status(500).json({ error: 'UX Analysis failed.' });
+    }
+});
+
 module.exports = router;

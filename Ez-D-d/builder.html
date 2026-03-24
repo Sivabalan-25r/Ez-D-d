@@ -202,7 +202,7 @@
 <!-- Inline Project Name -->
 <div class="flex items-center gap-1.5 px-2 h-8 bg-slate-900/60 rounded-md border border-slate-800/50 hover:border-slate-700 transition-colors group cursor-text" id="project-name-bar" title="Click to edit project name">
 <span class="material-symbols-outlined text-slate-600 group-hover:text-slate-400 !text-[14px] transition-colors">edit_note</span>
-<input type="text" id="project-name-inline" value="My Website" class="bg-transparent border-none outline-none text-[11px] text-slate-300 font-semibold tracking-wide w-28 placeholder:text-slate-600" placeholder="Project name...">
+<input type="text" id="project-name-inline" value="Website Name?" class="bg-transparent border-none outline-none text-[11px] text-slate-300 font-semibold tracking-wide w-28 placeholder:text-slate-600" placeholder="Project name...">
 </div>
 <!-- Toolbar Extras -->
 <div class="flex items-center gap-1 px-1 h-8 bg-slate-900 rounded-md border border-slate-800">
@@ -628,7 +628,7 @@ Copy to Clipboard
 <div class="space-y-4">
 <div class="space-y-1.5">
 <label class="text-[9px] uppercase font-bold text-slate-600 tracking-wider">Project Name</label>
-<input type="text" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-sm px-3 text-[11px] text-slate-300 focus:border-emerald-500/50 focus:outline-none" id="project-name" value="My Website">
+<input type="text" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-sm px-3 text-[11px] text-slate-300 focus:border-emerald-500/50 focus:outline-none" id="project-name" value="Website Name?">
 </div>
 <div class="space-y-1.5">
 <label class="text-[9px] uppercase font-bold text-slate-600 tracking-wider">Canvas Background</label>
@@ -711,7 +711,7 @@ function closeModal(id) { document.getElementById(id).classList.remove('active')
 // ========== BUILDER STATE ==========
 let undoStack = [];
 let redoStack = [];
-let selectedIndices = [0];
+let selectedIndices = [];
 let draggedIdx = null;
 let elCounter = 0;
 
@@ -1458,6 +1458,7 @@ function updateInspector() {
     if (selectedIndices.length === 1) {
         const idx = selectedIndices[0];
         const el = elements[idx];
+        if (!el) return;
         const target = document.getElementById('inspector-target');
         if (target) target.textContent = (el.type || 'module').toUpperCase();
 
@@ -1538,7 +1539,7 @@ document.getElementById('support-link').addEventListener('click', (e) => { e.pre
 
 // ========== SAVE PROJECT ==========
 function saveProject() {
-    const projectName = document.getElementById('project-name-inline').value || 'My Website';
+    const projectName = document.getElementById('project-name-inline').value || 'Website Name?';
     const projectData = {
         name: projectName,
         elements: elements,
@@ -1562,7 +1563,7 @@ if (savedName) {
 }
 
 inlineName.addEventListener('change', () => {
-    const name = inlineName.value || 'My Website';
+    const name = inlineName.value || 'Website Name?';
     document.getElementById('project-name').value = name;
     localStorage.setItem('ez-dd-project-name', name);
     showToast('Project renamed: ' + name, 'edit');
@@ -1580,7 +1581,7 @@ let previewAutoUpdate = null;
 
 function generatePreviewHTML() {
     const canvasBg = document.getElementById('canvas-frame').style.backgroundColor || '#ffffff';
-    const projectName = document.getElementById('project-name-inline').value || 'My Website';
+    const projectName = document.getElementById('project-name-inline').value || 'Website Name?';
     const bodyContent = elements.map(el => {
         const style = el.style || '';
         // Strip builder-specific classes from the HTML

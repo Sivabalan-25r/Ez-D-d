@@ -70,7 +70,7 @@ function cleanHTML(html) {
 async function generateComponent(config) {
   const { type, theme = 'dark', userPrompt = "" } = config;
   const start = Date.now();
-  const systemPrompt = `Archetype: ${type}\nTheme: ${theme}\nRequest: ${userPrompt}\nRules: Valid Tailwind HTML ONLY. Wrap in <section>. No MKDN.`;
+  const systemPrompt = `Archetype: ${type}\nTheme: ${theme}\nRequest: ${userPrompt}\nRules: Valid HTML+Tailwind ONLY. Use Container Queries (@container, @md:, @lg:) instead of media queries (md:). Wrap in <section>. No Markdown.`;
 
   try {
     const result = await generateWithGemini(systemPrompt);
@@ -129,4 +129,21 @@ async function refineText(text, instruction) {
   }
 }
 
-module.exports = { generateComponent, refineComponent, refineText };
+async function analyzeUX(html) {
+  const prompt = `
+  Analyze this HTML component for UX, UI, and conversion rate optimization based on modern web standards (Tailwind CSS context):
+  ${html}
+  
+  Provide exactly 3 concise, actionable bullet points (no more than 10 words each) on how to improve its design or UX. No markdown outside of the bullets.
+  `;
+  
+  try {
+    const result = await generateWithGemini(prompt);
+    return { text: result.trim(), source: 'gemini' };
+  } catch (err) {
+    const result = await generateWithGroq(prompt);
+    return { text: result.trim(), source: 'groq' };
+  }
+}
+
+module.exports = { generateComponent, refineComponent, refineText, analyzeUX };

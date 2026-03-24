@@ -2,13 +2,9 @@
   "name": "ez-dd-root",
   "version": "1.0.0",
   "scripts": {
-    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
-    "backend": "cd backend && npm run dev",
-    "frontend": "live-server --port=5500",
-    "install-all": "npm install && cd backend && npm install"
+    "dev": "concurrently \"node backend/server.js\" \"npx live-server --port=5500\""
   },
-  "devDependencies": {
-    "concurrently": "^8.2.0",
-    "live-server": "^1.2.2"
+  "dependencies": {
+    "http-server": "^14.1.1"
   }
 }

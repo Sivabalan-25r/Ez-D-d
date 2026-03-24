@@ -143,6 +143,14 @@
         }
         .action-btn:hover { background: rgba(2, 6, 23, 0.15); }
 
+        .element-content { 
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden; 
+            container-type: both;
+            container-name: element;
+        }
+
         /* Resize Handle */
         .resize-handle {
             position: absolute; bottom: -5px; right: -5px; width: 10px; height: 10px;
@@ -166,28 +174,57 @@
         .device-mobile .hidden-mobile { opacity: 0.2; pointer-events: none; filter: grayscale(1); }
         .device-tablet .hidden-tablet { opacity: 0.2; pointer-events: none; filter: grayscale(1); }
 
-        /* Preview Mode UI Hiding */
-        body.preview-mode header,
-        body.preview-mode aside,
-        body.preview-mode footer,
-        body.preview-mode .el-label,
-        body.preview-mode .el-actions,
-        body.preview-mode .resize-handle { 
-            display: none !important; 
+        /* Device Preview Window Sizing */
+        #canvas-area.device-desktop #canvas-frame {
+            width: 1280px !important;
+            max-width: calc(100% - 48px) !important;
+            min-height: 800px !important;
+            margin: 0 auto;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        body.preview-mode main { 
-            margin: 0 !important; 
-            padding: 0 !important;
-            height: 100vh !important;
-            width: 100vw !important;
-            background: #ffffff !important;
+        #canvas-area.device-tablet #canvas-frame {
+            width: 360px !important;
+            max-width: 360px !important;
+            height: 640px !important;
+            min-height: 640px !important;
+            margin: 0 auto;
+            overflow-y: auto !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        body.preview-mode #canvas-frame {
-            border: none !important;
-            box-shadow: none !important;
-            border-radius: 0 !important;
-            max-width: 100% !important;
+        #canvas-area.device-mobile #canvas-frame {
+            width: 820px !important;
+            max-width: 820px !important;
+            height: 1180px !important;
+            min-height: 1180px !important;
+            margin: 0 auto;
+            overflow-y: auto !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        /* Dynamic Theme Variables for Canvas */
+        #canvas-frame {
+            --section-bg: #020617;
+            --section-bg-alt: #0f172a;
+            --section-text: #f8fafc;
+            --section-text-muted: #94a3b8;
+            --section-border: #1e293b;
+            --card-bg: rgba(30, 41, 59, 0.5);
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        #canvas-frame.light-theme {
+            --section-bg: #ffffff;
+            --section-bg-alt: #f8fafc;
+            --section-text: #020617;
+            --section-text-muted: #64748b;
+            --section-border: #e2e8f0;
+            --card-bg: rgba(241, 245, 249, 0.8);
+            background-color: #ffffff !important;
+            color: #020617 !important;
+        }
+
+        .theme-aware-btn-primary { background: #10b981; color: #020617; }
+        #canvas-frame.light-theme .theme-aware-btn-primary { background: #10b981; color: #ffffff; }
     </style>
 </head>
 <body class="bg-background font-body text-on-surface overflow-hidden">
@@ -230,7 +267,7 @@
         </div>
 
         <div class="hidden lg:flex items-center gap-2 h-8 px-3 bg-slate-900/50 rounded-md border border-slate-800/30 group">
-            <input type="text" id="project-name-top" value="My Website" class="bg-transparent text-xs font-bold text-slate-400 focus:text-slate-100 outline-none w-32 tracking-tight transition-colors">
+            <input type="text" id="project-name-top" value="Website Name?" class="bg-transparent text-xs font-bold text-slate-400 focus:text-slate-100 outline-none w-32 tracking-tight transition-colors">
             <span class="material-symbols-outlined !text-[14px] text-slate-700 group-hover:text-slate-500">edit</span>
         </div>
     </div>
@@ -275,28 +312,33 @@
     </button>
 </div>
 
-<!-- AI Integration Tab -->
-<div class="px-4 mb-4">
-    <div class="bg-gradient-to-br from-emerald-500/10 to-blue-500/10 border border-emerald-500/20 rounded-lg p-3 space-y-4">
+</div>
+<div class="flex-1 overflow-y-auto p-3 pb-8 space-y-1" id="comp-panel">
+<!-- AI ORACLE SECTION -->
+<div class="comp-group" data-group="ai">
+    <div class="comp-header flex items-center justify-between p-2 rounded-sm cursor-pointer hover:bg-slate-900 transition-colors" data-toggle="ai">
         <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-emerald-400 !text-[16px] animate-pulse">auto_awesome</span>
-            <span class="text-[10px] uppercase tracking-[0.2em] text-slate-300 font-bold">AI Oracle</span>
+            <span class="text-[10px] uppercase tracking-[0.2em] text-emerald-400 font-bold">AI Oracle</span>
         </div>
+        <span class="material-symbols-outlined text-slate-600 !text-[14px] toggle-arrow">expand_less</span>
+    </div>
 
+    <div class="comp-items p-3 space-y-4 bg-gradient-to-br from-emerald-500/5 to-blue-500/5 border border-emerald-500/10 rounded-lg mt-1">
         <!-- Prompt Templates -->
         <div class="space-y-2">
             <label class="text-[9px] uppercase font-bold text-slate-600">Quick Templates</label>
             <div class="flex flex-wrap gap-1.5">
-                <button class="px-2 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-[9px] font-bold text-emerald-400 rounded-sm border border-emerald-500/20 transition-colors template-btn" data-type="hero" data-prompt="High-impact hero section with a bold headline, minimalist subtitle, and clear primary CTA button.">Hero</button>
-                <button class="px-2 py-1 bg-blue-500/10 hover:bg-blue-500/20 text-[9px] font-bold text-blue-400 rounded-sm border border-blue-500/20 transition-colors template-btn" data-type="features" data-prompt="3-column features grid with modern icons, clean titles, and concise descriptions.">Features</button>
-                <button class="px-2 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-[9px] font-bold text-amber-400 rounded-sm border border-amber-500/20 transition-colors template-btn" data-type="pricing" data-prompt="Professional 3-tier pricing table with 'Standard', 'Pro-Select', and 'Enterprise' plans. Clear feature checklists.">Pricing</button>
-                <button class="px-2 py-1 bg-slate-500/10 hover:bg-slate-500/20 text-[9px] font-bold text-slate-400 rounded-sm border border-slate-500/20 transition-colors template-btn" data-type="custom" data-prompt="Modern minimalist footer with brand logo, quick links, and social icons.">Footer</button>
+                <button class="px-2 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-[9px] font-bold text-emerald-400 rounded-sm border border-emerald-500/20 transition-colors comp-item" data-type="host_template">Host</button>
+                <button class="px-2 py-1 bg-blue-500/10 hover:bg-blue-500/20 text-[9px] font-bold text-blue-400 rounded-sm border border-blue-500/20 transition-colors comp-item" data-type="features_template">Features</button>
+                <button class="px-2 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-[9px] font-bold text-amber-400 rounded-sm border border-amber-500/20 transition-colors comp-item" data-type="pricing_template">Pricing</button>
+                <button class="px-2 py-1 bg-slate-500/10 hover:bg-slate-500/20 text-[9px] font-bold text-slate-400 rounded-sm border border-slate-500/20 transition-colors comp-item" data-type="footer_template">Footer</button>
             </div>
         </div>
         
         <div class="space-y-2">
             <label class="text-[9px] uppercase font-bold text-slate-600 block">Archetype</label>
-            <select id="ai-type" class="w-full h-7 bg-slate-950/50 border border-slate-800 rounded px-2 text-[10px] text-slate-300 focus:border-emerald-500/50 focus:outline-none cursor-pointer">
+            <select id="ai-type" class="w-full h-8 py-1 bg-slate-950/50 border border-slate-800 rounded px-2 text-[10px] text-slate-300 focus:border-emerald-500/50 focus:outline-none cursor-pointer">
                 <option value="hero">Hero Section</option>
                 <option value="features">Features Grid</option>
                 <option value="pricing">Pricing Table</option>
@@ -308,14 +350,14 @@
         <div class="grid grid-cols-2 gap-2">
             <div class="space-y-1">
                 <label class="text-[9px] uppercase font-bold text-slate-600">Theme</label>
-                <select id="ai-theme" class="w-full h-7 bg-slate-950/50 border border-slate-800 rounded px-1 text-[10px] text-slate-300 focus:outline-none">
+                <select id="ai-theme" class="w-full h-8 py-1 bg-slate-950/50 border border-slate-800 rounded px-1 text-[10px] text-slate-300 focus:outline-none cursor-pointer">
                     <option value="dark">Dark</option>
                     <option value="light">Light</option>
                 </select>
             </div>
             <div class="space-y-1">
                 <label class="text-[9px] uppercase font-bold text-slate-600">Columns</label>
-                <select id="ai-columns" class="w-full h-7 bg-slate-950/50 border border-slate-800 rounded px-1 text-[10px] text-slate-300 focus:outline-none">
+                <select id="ai-columns" class="w-full h-8 py-1 bg-slate-950/50 border border-slate-800 rounded px-1 text-[10px] text-slate-300 focus:outline-none cursor-pointer">
                     <option value="1">1 Col</option>
                     <option value="2">2 Col</option>
                     <option value="3">3 Col</option>
@@ -323,7 +365,7 @@
             </div>
         </div>
 
-        <textarea id="ai-prompt" placeholder="Describe specifics (e.g. 'Space tech theme', '3 cards')..." class="w-full h-16 bg-slate-950/50 border border-slate-800 rounded p-2 text-[10px] text-slate-300 focus:border-emerald-500/50 focus:outline-none resize-none placeholder:text-slate-700"></textarea>
+        <textarea id="ai-prompt" placeholder="Describe specifics..." class="w-full h-12 bg-slate-950/50 border border-slate-800 rounded p-2 text-[10px] text-slate-300 focus:border-emerald-500/50 focus:outline-none resize-none placeholder:text-slate-700 font-sans"></textarea>
         
         <button id="ai-gen-btn" class="w-full h-8 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
             <span class="gen-text">Generate Magic</span>
@@ -331,30 +373,7 @@
         </button>
     </div>
 </div>
-
-<div class="px-4 mb-3">
-    <button onclick="saveSelectedToLibrary()" class="w-full h-8 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 rounded-md text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 group">
-        <span class="material-symbols-outlined !text-[14px]">bookmark</span>
-        <span>Stash to Library</span>
-    </button>
-</div>
-
-<div class="relative mt-1 px-4">
-<input type="text" placeholder="Search components..." id="comp-search" class="w-full h-7 pl-7 pr-2 bg-slate-900 border border-slate-800 rounded-sm text-[10px] text-slate-300 focus:border-emerald-500/50 focus:outline-none placeholder:text-slate-600">
-<span class="material-symbols-outlined absolute left-5.5 top-1 text-slate-600 !text-[16px]">search</span>
-</div>
-</div>
-<div class="flex-1 overflow-y-auto p-3 pb-8 space-y-1" id="comp-panel">
-<!-- SAVED COMPONENTS -->
-<div class="comp-group" data-group="saved" id="saved-group-section">
-<div class="comp-header flex items-center justify-between p-2 rounded-sm cursor-pointer hover:bg-slate-900 transition-colors" data-toggle="saved">
-<div class="flex items-center gap-2"><span class="material-symbols-outlined text-blue-400 !text-[16px]">stars</span><span class="text-[10px] uppercase tracking-[0.2em] text-blue-400 font-bold">Saved Components</span></div>
-<span class="material-symbols-outlined text-slate-600 !text-[14px] toggle-arrow">expand_more</span>
-</div>
-<div class="comp-items pl-2 space-y-0.5 mt-1 hidden" id="saved-items-container">
-    <!-- Saved items will populate here -->
-</div>
-</div>
+<!-- SAVED COMPONENTS REMOVED -->
 
 <!-- LAYOUT -->
 <div class="comp-group" data-group="layout">
@@ -433,9 +452,13 @@
 </div>
 </aside>
 <!-- Main Canvas -->
-<main class="ml-60 mr-72 mt-14 h-[calc(100vh-56px)] bg-slate-900 bg-grid-slate flex items-center justify-center relative overflow-y-auto p-12 device-desktop" id="canvas-area">
+<main class="ml-60 mr-72 mt-14 h-[calc(100vh-56px)] bg-slate-900 bg-grid-slate flex flex-col items-center justify-start relative overflow-y-auto p-12 pb-32 device-desktop" id="canvas-area">
+    <div id="isolation-banner" onclick="exitIsolationMode()" class="absolute top-6 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-2.5 rounded-full font-bold uppercase tracking-[0.15em] text-[10px] hidden z-[100] flex items-center gap-3 shadow-[0_10px_30px_rgba(37,99,235,0.4)] cursor-pointer hover:bg-blue-500 hover:scale-[1.02] transition-all border border-blue-400">
+        <span class="material-symbols-outlined !text-[16px]">arrow_back</span>
+        <span>Return to Main Canvas</span>
+    </div>
 <!-- Website Canvas Container -->
-<section class="canvas-frame w-full max-w-4xl bg-white shadow-2xl rounded-sm min-h-[700px] flex flex-col relative overflow-hidden text-slate-950" id="canvas-frame">
+<section class="canvas-frame @container w-full max-w-4xl bg-white shadow-2xl rounded-sm min-h-[800px] flex flex-col relative text-slate-950" id="canvas-frame">
 <div id="canvas-elements-container" class="flex-1 flex flex-col">
 <!-- Hero Section (Selected State) -->
 <div class="builder-element selected flex-1 flex flex-col items-center justify-center text-center p-24 relative" id="hero-module">
@@ -475,6 +498,8 @@
             <div class="flex-1 py-3 text-[10px] uppercase tracking-[0.2em] text-slate-600 hover:text-slate-400 font-bold text-center cursor-pointer transition-colors inspector-tab" data-tab="layout">Layout</div>
             <div class="flex-1 py-3 text-[10px] uppercase tracking-[0.2em] text-slate-600 hover:text-slate-400 font-bold text-center cursor-pointer transition-colors inspector-tab" data-tab="content">Content</div>
             <div class="flex-1 py-3 text-[10px] uppercase tracking-[0.2em] text-slate-600 hover:text-slate-400 font-bold text-center cursor-pointer transition-colors inspector-tab" data-tab="extra">Extra</div>
+            <!-- UX AI Tab -->
+            <div class="flex-1 py-3 text-[10px] uppercase tracking-[0.2em] text-blue-400 hover:text-blue-300 font-bold border-b-2 border-transparent hover:border-blue-400 text-center cursor-pointer transition-colors inspector-tab" data-tab="ux">UX</div>
         </div>
 
         <!-- Design Tab -->
@@ -621,6 +646,18 @@
                     </div>
                 </div>
             </section>
+            
+            <!-- AI Align -->
+            <section class="mt-8 border-t border-slate-800 pt-6">
+                <div class="bg-gradient-to-br from-amber-500/5 to-orange-500/5 border border-amber-500/10 rounded-lg p-4 space-y-3 shadow-lg shadow-amber-500/5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-500">Auto-Align (AI)</span>
+                        <span class="material-symbols-outlined text-amber-500 !text-[16px] animate-pulse">align_horizontal_center</span>
+                    </div>
+                    <p class="text-[9px] text-slate-500 font-medium leading-relaxed">Let AI fix spacing, flexbox, and alignment to match modern layout standards.</p>
+                    <button id="ai-align-btn" class="w-full h-8 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded text-[9px] uppercase tracking-wider transition-all shadow-lg active:scale-95">Fix Layout</button>
+                </div>
+            </section>
         </div>
 
         <!-- Content Tab -->
@@ -645,6 +682,18 @@
                 </div>
             </div>
             <button id="apply-content-btn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-sm text-[10px] uppercase tracking-[0.2em] font-bold transition-all active:scale-95 shadow-lg shadow-emerald-500/10">Apply Changes</button>
+            
+            <!-- Smart Wire -->
+            <section class="mt-6 border-t border-slate-800 pt-6">
+                 <div class="bg-gradient-to-br from-fuchsia-500/5 to-pink-500/5 border border-fuchsia-500/10 rounded-lg p-4 space-y-3 shadow-lg shadow-fuchsia-500/5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-fuchsia-500">Smart Wiring (AI)</span>
+                        <span class="material-symbols-outlined text-fuchsia-500 !text-[16px] animate-pulse">link</span>
+                    </div>
+                    <p class="text-[9px] text-slate-500 font-medium leading-relaxed">Automatically detect and link buttons/nav items to logical destinations.</p>
+                    <button id="ai-wire-btn" class="w-full h-8 bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold rounded text-[9px] uppercase tracking-wider transition-all active:scale-95 shadow-lg">Auto Link Component</button>
+                </div>
+            </section>
         </div>
 
         <!-- AI & Extra Tab -->
@@ -695,6 +744,33 @@
                 </div>
             </section>
         </div>
+        
+        <!-- UX AI Tab -->
+        <div class="flex-1 overflow-y-auto p-5 pb-16 space-y-6 inspector-content hidden" id="tab-ux">
+            <section class="bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border border-blue-500/10 rounded-lg p-4 space-y-4 shadow-lg shadow-blue-500/5">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-400">UX Suggestions (AI)</span>
+                    <span class="material-symbols-outlined text-blue-400 !text-[16px] animate-pulse">psychology</span>
+                </div>
+                <p class="text-[9px] text-slate-500 font-medium">Analyze the current component for UX/UI improvements and conversion optimization.</p>
+                <div id="ux-suggestions-box" class="min-h-[60px] max-h-[150px] overflow-y-auto bg-slate-950/80 border border-slate-800 rounded p-3 text-[10px] text-blue-200 hidden leading-relaxed font-mono"></div>
+                <button id="ai-analyze-ux-btn" class="w-full h-8 bg-blue-600 hover:bg-blue-500 text-white rounded text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg">
+                    <span class="analyze-ux-text">Analyze Component</span>
+                    <span class="material-symbols-outlined !text-[14px]">search_insights</span>
+                </button>
+            </section>
+            
+            <section class="bg-gradient-to-br from-indigo-500/5 to-purple-500/5 border border-indigo-500/10 rounded-lg p-4 space-y-4 text-center mt-6 shadow-lg shadow-indigo-500/5">
+                 <div class="flex items-center justify-center mb-2">
+                    <span class="material-symbols-outlined text-indigo-400 !text-[24px]">format_paint</span>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-400 block">Design Consistency</span>
+                <p class="text-[9px] text-slate-500 font-medium leading-relaxed">Automatically enforce the global typography and atmosphere constraints across this element.</p>
+                <button id="ai-consistency-btn" class="w-full h-8 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg mt-2">
+                    Enforce Consistency
+                </button>
+            </section>
+        </div>
 </aside>
 <!-- Global Footer -->
 <footer class="fixed bottom-0 w-full h-7 z-50 bg-slate-950 border-t border-slate-800/60 flex items-center justify-between px-6">
@@ -726,7 +802,7 @@
 <div class="space-y-4">
 <div class="space-y-1.5">
 <label class="text-[9px] uppercase font-bold text-slate-600 tracking-wider">Project Name</label>
-<input type="text" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-sm px-3 text-[11px] text-slate-300 focus:border-emerald-500/50 focus:outline-none" id="project-name" value="My Website">
+<input type="text" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-sm px-3 text-[11px] text-slate-300 focus:border-emerald-500/50 focus:outline-none" id="project-name" value="Website Name?">
 </div>
 <div class="space-y-1.5">
 <label class="text-[9px] uppercase font-bold text-slate-600 tracking-wider">Canvas Background</label>
@@ -955,7 +1031,7 @@ function closeModal(id) { document.getElementById(id).classList.remove('active')
 let elements = [];
 let undoStack = [];
 let redoStack = [];
-let selectedIndices = [0];
+let selectedIndices = [];
 let draggedIdx = null;
 let elCounter = 0;
 
@@ -1017,6 +1093,126 @@ function getElementTemplates() {
         footercomp: `<footer style="padding:32px;background:#0f172a;border-radius:8px;margin:16px;"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px;margin-bottom:24px;"><div><h5 style="color:white;font-size:16px;font-weight:700;margin:0 0 12px;" contenteditable="true">Brand</h5><p style="color:#64748b;font-size:12px;max-width:200px;line-height:1.5;margin:0;" contenteditable="true">Building better websites with Ez D&d.</p></div><div><h6 style="color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 10px;">Links</h6><div style="display:flex;flex-direction:column;gap:6px;"><a style="color:#64748b;font-size:12px;text-decoration:none;cursor:pointer;">Home</a><a style="color:#64748b;font-size:12px;text-decoration:none;cursor:pointer;">About</a><a style="color:#64748b;font-size:12px;text-decoration:none;cursor:pointer;">Privacy</a></div></div><div><h6 style="color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 10px;">Contact</h6><div style="display:flex;flex-direction:column;gap:6px;"><span style="color:#64748b;font-size:12px;">hello@brand.com</span><span style="color:#64748b;font-size:12px;">+1 (555) 123-4567</span></div></div></div><div style="border-top:1px solid #1e293b;padding-top:16px;text-align:center;"><span style="color:#475569;font-size:11px;">© 2024 Brand. All rights reserved.</span></div></footer>`,
 
         divider: `<div style="padding:8px 24px;"><hr style="border:none;height:2px;background:linear-gradient(90deg,transparent,#e2e8f0,transparent);margin:0;"></div>`,
+        
+        host_template: `<div style="background:var(--section-bg);color:var(--section-text);min-height:inherit;display:flex;flex-direction:column;font-family:'Inter',sans-serif;width:100%;height:100%;overflow:hidden;">
+    <nav style="display:flex;align-items:center;justify-content:space-between;padding:min(2cqh, 16px) 32px;background:var(--section-bg-alt);border-bottom:1px solid var(--section-border);flex-shrink:0;">
+        <div style="font-weight:800;font-size:18px;color:#10b981;" contenteditable="true">test sample</div>
+        <div style="display:flex;gap:24px;">
+            <span style="color:#94a3b8;font-size:13px;font-weight:500;cursor:pointer;" contenteditable="true">test sample</span>
+            <span style="color:#94a3b8;font-size:13px;font-weight:500;cursor:pointer;" contenteditable="true">test sample</span>
+            <span style="color:#94a3b8;font-size:13px;font-weight:500;cursor:pointer;" contenteditable="true">test sample</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;">
+            <!-- Toggle Box -->
+            <label style="display:flex;align-items:center;cursor:pointer;background:#1e293b;border-radius:20px;padding:2px;width:40px;height:24px;border:1px solid #334155;">
+                <input type="checkbox" style="display:none;" onchange="this.nextElementSibling.style.transform = this.checked ? 'translateX(16px)' : 'translateX(0)'; this.parentElement.style.background = this.checked ? '#10b981' : '#1e293b';">
+                <div style="width:18px;height:18px;background:white;border-radius:50%;transition:transform 0.2s;box-shadow:0 2px 4px rgba(0,0,0,0.2);"></div>
+            </label>
+            <!-- Avatar -->
+            <div style="width:32px;height:32px;border-radius:50%;border:1px solid #334155;display:flex;align-items:center;justify-content:center;color:#94a3b8;background:#020617;">
+                <span class="material-symbols-outlined !text-[16px]">person</span>
+            </div>
+        </div>
+    </nav>
+        <h1 style="font-size:clamp(20px, 8cqw, 64px);font-weight:800;color:var(--section-text);margin-bottom:min(2cqh, 16px);line-height:1.1;letter-spacing:-0.05em;" contenteditable="true">test sample</h1>
+        <p style="font-size:clamp(10px, 2.5cqw, 18px);color:var(--section-text-muted);max-width:500px;margin-bottom:clamp(16px, 4cqh, 40px);line-height:1.5;" contenteditable="true">test sample</p>
+        <div style="display:flex;gap:16px;justify-content:center;">
+            <button style="padding:clamp(8px, 2cqh, 16px) clamp(16px, 4cqw, 32px);background:#10b981;color:#020617;font-weight:700;font-size:clamp(9px, 1.5cqw, 14px);text-transform:uppercase;border:none;border-radius:4px;letter-spacing:0.05em;cursor:pointer;" contenteditable="true">test sample</button>
+            <button style="padding:clamp(8px, 2cqh, 16px) clamp(16px, 4cqw, 32px);background:var(--section-border);color:var(--section-text);font-weight:700;font-size:clamp(9px, 1.5cqw, 14px);text-transform:uppercase;border:none;border-radius:4px;letter-spacing:0.05em;cursor:pointer;" contenteditable="true">test sample</button>
+        </div>
+    </div>
+</div>`,
+
+        features_template: `<div style="background:var(--section-bg);color:var(--section-text);padding:8cqh 24px;min-height:inherit;font-family:'Inter',sans-serif;width:100%;height:100%;overflow:hidden;">
+    <div style="max-width:1200px;margin:0 auto;height:100%;display:flex;flex-direction:column;justify-content:center;">
+        <div style="text-align:center;margin-bottom:4cqh;">
+            <h2 style="font-size:clamp(20px, 5cqw, 36px);font-weight:800;margin-bottom:1cqh;" contenteditable="true">test sample</h2>
+            <p style="font-size:clamp(10px, 2cqw, 16px);color:var(--section-text-muted);" contenteditable="true">test sample</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:clamp(12px, 3cqw, 32px);">
+            <div style="background:var(--card-bg);padding:clamp(12px, 4cqw, 32px);border-radius:16px;border:1px solid var(--section-border);text-align:center;">
+                <div style="width:48px;height:48px;background:rgba(16,185,129,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;"><span class="material-symbols-outlined" style="color:#34d399;">star</span></div>
+                <h3 style="font-size:20px;font-weight:700;margin-bottom:12px;" contenteditable="true">test sample</h3>
+                <p style="font-size:14px;color:var(--section-text-muted);line-height:1.6;" contenteditable="true">test sample</p>
+            </div>
+            <div style="background:var(--card-bg);padding:32px;border-radius:16px;border:1px solid var(--section-border);text-align:center;">
+                <div style="width:48px;height:48px;background:rgba(16,185,129,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;"><span class="material-symbols-outlined" style="color:#34d399;">rocket_launch</span></div>
+                <h3 style="font-size:20px;font-weight:700;margin-bottom:12px;" contenteditable="true">test sample</h3>
+                <p style="font-size:14px;color:var(--section-text-muted);line-height:1.6;" contenteditable="true">test sample</p>
+            </div>
+            <div style="background:var(--card-bg);padding:32px;border-radius:16px;border:1px solid var(--section-border);text-align:center;">
+                <div style="width:48px;height:48px;background:rgba(16,185,129,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;"><span class="material-symbols-outlined" style="color:#34d399;">security</span></div>
+                <h3 style="font-size:20px;font-weight:700;margin-bottom:12px;" contenteditable="true">test sample</h3>
+                <p style="font-size:14px;color:var(--section-text-muted);line-height:1.6;" contenteditable="true">test sample</p>
+            </div>
+        </div>
+    </div>
+</div>`,
+
+        pricing_template: `<div style="background:var(--section-bg-alt);color:var(--section-text);padding:160px 24px;min-height:inherit;font-family:'Inter',sans-serif;width:100%;height:100%;">
+    <div style="max-width:1000px;margin:0 auto;">
+        <div style="text-align:center;margin-bottom:64px;">
+            <h2 style="font-size:36px;font-weight:800;margin-bottom:16px;" contenteditable="true">test sample</h2>
+            <p style="font-size:16px;color:var(--section-text-muted);" contenteditable="true">test sample</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:32px;">
+            <div style="background:var(--section-bg);padding:40px;border-radius:16px;border:1px solid var(--section-border);">
+                <h3 style="font-size:24px;font-weight:700;margin-bottom:8px;" contenteditable="true">test sample</h3>
+                <div style="font-size:48px;font-weight:800;margin-bottom:24px;color:#10b981;" contenteditable="true">test sample</div>
+                <ul style="list-style:none;padding:0;margin:0 0 32px 0;color:var(--section-text-muted);font-size:14px;line-height:2.5;">
+                    <li contenteditable="true">✓ test sample</li>
+                    <li contenteditable="true">✓ test sample</li>
+                    <li contenteditable="true">✓ test sample</li>
+                </ul>
+                <button style="width:100%;padding:14px;background:var(--section-border);color:var(--section-text);border:none;border-radius:8px;font-weight:700;cursor:pointer;" contenteditable="true">test sample</button>
+            </div>
+            <div style="background:var(--section-bg);padding:40px;border-radius:16px;border:2px solid #10b981;position:relative;">
+                <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#10b981;color:#020617;font-size:12px;font-weight:bold;padding:4px 12px;border-radius:20px;text-transform:uppercase;" contenteditable="true">test sample</div>
+                <h3 style="font-size:24px;font-weight:700;margin-bottom:8px;" contenteditable="true">test sample</h3>
+                <div style="font-size:48px;font-weight:800;margin-bottom:24px;color:#10b981;" contenteditable="true">test sample</div>
+                <ul style="list-style:none;padding:0;margin:0 0 32px 0;color:#94a3b8;font-size:14px;line-height:2.5;">
+                    <li contenteditable="true">✓ test sample</li>
+                    <li contenteditable="true">✓ test sample</li>
+                    <li contenteditable="true">✓ test sample</li>
+                </ul>
+                <button style="width:100%;padding:14px;background:#10b981;color:#020617;border:none;border-radius:8px;font-weight:700;cursor:pointer;" contenteditable="true">test sample</button>
+            </div>
+        </div>
+    </div>
+</div>`,
+
+        footer_template: `<footer style="background:var(--section-bg);color:var(--section-text);padding:120px 24px 64px;min-height:inherit;font-family:'Inter',sans-serif;width:100%;height:100%;border-top:1px solid var(--section-border);">
+    <div style="max-width:1200px;margin:0 auto;">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:48px;margin-bottom:48px;">
+            <div style="flex:1;min-width:200px;">
+                <div style="font-size:24px;font-weight:800;margin-bottom:16px;color:#10b981;" contenteditable="true">test sample</div>
+                <p style="font-size:14px;color:#94a3b8;line-height:1.6;max-width:300px;" contenteditable="true">test sample</p>
+            </div>
+            <div style="min-width:150px;">
+                <h4 style="font-size:14px;font-weight:700;margin-bottom:20px;text-transform:uppercase;letter-spacing:0.05em;" contenteditable="true">test sample</h4>
+                <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;color:#94a3b8;">
+                    <span style="cursor:pointer;" contenteditable="true">test sample</span>
+                    <span style="cursor:pointer;" contenteditable="true">test sample</span>
+                    <span style="cursor:pointer;" contenteditable="true">test sample</span>
+                </div>
+            </div>
+            <div style="min-width:150px;">
+                <h4 style="font-size:14px;font-weight:700;margin-bottom:20px;text-transform:uppercase;letter-spacing:0.05em;" contenteditable="true">test sample</h4>
+                <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;color:#94a3b8;">
+                    <span style="cursor:pointer;" contenteditable="true">test sample</span>
+                    <span style="cursor:pointer;" contenteditable="true">test sample</span>
+                </div>
+            </div>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:24px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#64748b;">
+            <span contenteditable="true">test sample</span>
+            <div style="display:flex;gap:16px;">
+                <span style="cursor:pointer;" contenteditable="true">test sample</span>
+                <span style="cursor:pointer;" contenteditable="true">test sample</span>
+            </div>
+        </div>
+    </div>
+</footer>`
     };
 }
 
@@ -1026,31 +1222,115 @@ function saveHistory() {
     redoStack = [];
 }
 
-// Initialize with hero element
-elements = [{
-    type: 'hero',
-    html: document.getElementById('hero-module').outerHTML
-}];
+// Initialize with all four primary templates if empty or first load
+if (elements.length === 0) {
+    const templates = getElementTemplates();
+    elements = [
+        { type: 'Host Template', html: templates['host_template'] },
+        { type: 'Features Template', html: templates['features_template'] },
+        { type: 'Pricing Template', html: templates['pricing_template'] },
+        { type: 'Footer Template', html: templates['footer_template'] }
+    ];
+}
+
+// Ensure first render call exists
+renderElements();
+updateInspector();
+
+// Global Theme Listener
+document.getElementById('ai-theme').addEventListener('change', (e) => {
+    const isLight = e.target.value === 'light';
+    const frame = document.getElementById('canvas-frame');
+    if (isLight) {
+        frame.classList.add('light-theme');
+        showToast('Switched to Light Theme', 'light_mode');
+    } else {
+        frame.classList.remove('light-theme');
+        showToast('Switched to Dark Theme', 'dark_mode');
+    }
+});
+
+let isIsolationMode = false;
+let mainElementsTemp = [];
+
+function enterIsolationMode() {
+    if (isIsolationMode) return;
+    saveHistory(); // Save the state before isolation
+    mainElementsTemp = [...elements];
+    isIsolationMode = true;
+    
+    // Inject exact Hero component elements
+    elements = [
+        { type: 'Hero Title', html: `<h1 class="mx-auto" contenteditable="true" style="font-size: 80px; font-weight: 800; text-align: center; color: #020617; line-height: 1; margin: 0; padding: 20px; outline: none; letter-spacing: -0.05em; max-width: 800px;">Title</h1>` },
+        { type: 'Hero Description', html: `<p class="mx-auto" contenteditable="true" style="font-size: 24px; text-align: center; color: #64748b; margin: 0; padding: 10px; max-width: 600px; line-height: 1.5; outline: none;">Description</p>` }
+    ];
+    
+    selectedIndices = [];
+    activeDeepNode = null;
+    document.querySelectorAll('.deep-selected').forEach(n => { n.style.outline = ''; n.classList.remove('deep-selected'); });
+
+    // UI Updates
+    document.getElementById('isolation-banner').classList.remove('hidden');
+    document.getElementById('isolation-banner').style.display = 'flex';
+    document.getElementById('canvas-area').style.background = '#f1f5f9';
+    document.getElementById('canvas-area').classList.remove('bg-grid-slate');
+
+    renderElements();
+    showToast('Isolated Hero Canvas', 'architecture');
+}
+
+function exitIsolationMode() {
+    if (!isIsolationMode) return;
+    
+    // Compile the isolated elements into one parent section
+    const compiledHtml = `<section class="h-[600px] flex flex-col items-center justify-center bg-slate-50 relative group px-6">` +
+                         `<div class="max-w-4xl mx-auto z-10 w-full flex flex-col items-center gap-6">` +
+                         elements.map(el => el.html).join('') +
+                         `</div></section>`;
+    
+    elements = [...mainElementsTemp];
+    isIsolationMode = false;
+    
+    saveHistory();
+    elements.push({ type: 'Hero Section', html: compiledHtml });
+    selectedIndices = [elements.length - 1]; // select the newly injected section
+    
+    // Switch UI back
+    document.getElementById('isolation-banner').classList.add('hidden');
+    document.getElementById('isolation-banner').style.display = 'none';
+    document.getElementById('canvas-area').style.background = '';
+    document.getElementById('canvas-area').classList.add('bg-grid-slate');
+
+    renderElements();
+    showToast('Hero Injected to Main', 'done');
+}
 
 function renderElements() {
     const container = document.getElementById('canvas-elements-container');
     if (elements.length === 0) {
-        container.innerHTML = `<div class="flex-1 flex flex-col items-center justify-center text-center p-24 text-slate-400"><span class="material-symbols-outlined text-4xl mb-4 text-emerald-500/30" style="font-variation-settings:'FILL' 1;">add_circle</span><p class="text-sm">Drop components here to build</p></div>`;
+        container.innerHTML = `<div class="flex-1 flex flex-col items-center justify-center text-center p-24 text-slate-400 border-2 border-dashed border-slate-800/20 m-4 rounded-xl" ondragover="event.preventDefault(); this.classList.add('bg-emerald-500/5')" ondragleave="this.classList.remove('bg-emerald-500/5')" ondrop="handleDrop(event, 0)">
+            <span class="material-symbols-outlined text-4xl mb-4 text-emerald-500/30" style="font-variation-settings:'FILL' 1;">add_circle</span>
+            <p class="text-sm">Drag and drop components here to start building</p>
+        </div>`;
         return;
     }
+    
     container.innerHTML = elements.map((el, i) => {
         const isSelected = selectedIndices.includes(i);
         const isMulti = selectedIndices.length > 1 && isSelected;
+        const typeLabel = (el.type || 'ELEMENT').replace('_template', '').toUpperCase();
+        
         return `
         <div class="builder-element ${isSelected ? 'selected' : ''} ${isMulti ? 'multi-selected' : ''}" 
              data-idx="${i}" 
              draggable="true" 
+             style="${el.style || ''}"
              ondragstart="handleDragStart(event, ${i})"
              ondragover="handleDragOver(event, ${i})"
              ondragend="handleDragEnd(event)"
              ondrop="handleDrop(event, ${i})"
-             onclick="selectEl(${i}, event.shiftKey)">
-            <div class="el-label">${el.type}</div>
+             onclick="selectEl(${i}, event.shiftKey, event)">
+            <div class="el-label">${typeLabel}</div>
             <div class="el-actions">
                 <button class="action-btn" onclick="event.stopPropagation(); duplicateEl(${i})" title="Duplicate">
                     <span class="material-symbols-outlined !text-[12px]">content_copy</span>
@@ -1060,15 +1340,27 @@ function renderElements() {
                 </button>
                 <div class="action-btn cursor-move" title="Drag to reorder"><span class="material-symbols-outlined !text-[12px]">drag_indicator</span></div>
             </div>
-            <div class="element-content" style="${el.style || ''}">
+            <div class="element-content">
                 ${el.html}
             </div>
             <div class="resize-handle" onmousedown="event.stopPropagation(); startResize(event, ${i})"></div>
         </div>`;
     }).join('');
+
+    // Add a trailing drop zone for easier appending
+    const footerDrop = document.createElement('div');
+    footerDrop.className = 'w-full h-16 mt-4 border-2 border-dashed border-slate-800/10 rounded-lg flex items-center justify-center text-[10px] text-slate-500 hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all group cursor-pointer';
+    footerDrop.innerHTML = `<span class="material-symbols-outlined !text-[14px] mr-2 text-slate-700 group-hover:text-emerald-500">add_circle</span> Drop here to add to the bottom`;
+    footerDrop.ondragover = (e) => { e.preventDefault(); footerDrop.classList.add('border-emerald-500/50', 'bg-emerald-500/5'); };
+    footerDrop.ondragleave = () => { footerDrop.classList.remove('border-emerald-500/50', 'bg-emerald-500/5'); };
+    footerDrop.ondrop = (e) => { handleDrop(e, elements.length); };
+    footerDrop.onclick = () => { showToast('Drag a component here!', 'info'); };
+    container.appendChild(footerDrop);
 }
 
-function selectEl(idx, isShift = false) {
+let activeDeepNode = null;
+
+function selectEl(idx, isShift = false, event = null) {
     if (isShift) {
         if (selectedIndices.includes(idx)) {
             selectedIndices = selectedIndices.filter(i => i !== idx);
@@ -1078,10 +1370,38 @@ function selectEl(idx, isShift = false) {
     } else {
         selectedIndices = [idx];
     }
-    renderElements();
+    
+    // Instead of heavy renderElements, toggle CSS to preserve e.target state
+    document.querySelectorAll('.builder-element').forEach((el, i) => {
+        const isSel = selectedIndices.includes(i);
+        el.classList.toggle('selected', isSel);
+        el.classList.toggle('multi-selected', selectedIndices.length > 1 && isSel);
+    });
+
+    if (event && event.target) {
+        const isInvalidTarget = event.target.closest('.el-actions') || 
+                                event.target.classList.contains('resize-handle') || 
+                                event.target.classList.contains('builder-element') || 
+                                event.target.classList.contains('element-content');
+        if (!isInvalidTarget) {
+            document.querySelectorAll('.deep-selected').forEach(n => { n.style.outline = ''; n.classList.remove('deep-selected'); });
+            activeDeepNode = event.target;
+            activeDeepNode.classList.add('deep-selected');
+            activeDeepNode.style.outline = '2px dashed #10b981';
+            activeDeepNode.style.outlineOffset = '2px';
+        } else {
+            document.querySelectorAll('.deep-selected').forEach(n => { n.style.outline = ''; n.classList.remove('deep-selected'); });
+            activeDeepNode = null;
+        }
+    } else {
+        // Only run full render array if programmatic selection
+        document.querySelectorAll('.deep-selected').forEach(n => { n.style.outline = ''; n.classList.remove('deep-selected'); });
+        activeDeepNode = null;
+    }
+
     if (selectedIndices.length === 1) {
         const el = elements[selectedIndices[0]];
-        document.getElementById('inspector-target').textContent = el.type + ' module';
+        document.getElementById('inspector-target').textContent = activeDeepNode ? `<${activeDeepNode.tagName.toLowerCase()}> selected` : el.type + ' module';
     } else if (selectedIndices.length > 1) {
         document.getElementById('inspector-target').textContent = `${selectedIndices.length} items selected`;
     }
@@ -1114,12 +1434,17 @@ function handleDragOver(e, i) {
     const target = e.currentTarget;
     const rect = target.getBoundingClientRect();
     const midpoint = rect.top + rect.height / 2;
+    
+    // Clear other indicators
+    document.querySelectorAll('.builder-element').forEach(el => {
+        el.style.borderTop = '';
+        el.style.borderBottom = '';
+    });
+
     if (e.clientY < midpoint) {
-        target.style.borderTop = '2px solid #10B981';
-        target.style.borderBottom = '';
+        target.style.borderTop = '4px solid #10B981';
     } else {
-        target.style.borderBottom = '2px solid #10B981';
-        target.style.borderTop = '';
+        target.style.borderBottom = '4px solid #10B981';
     }
 }
 
@@ -1133,14 +1458,41 @@ function handleDragEnd(e) {
 
 function handleDrop(e, targetIdx) {
     e.preventDefault();
-    if (draggedIdx === null || draggedIdx === targetIdx) return;
     saveHistory();
-    const movedEl = elements.splice(draggedIdx, 1)[0];
-    elements.splice(targetIdx, 0, movedEl);
-    selectedIndices = [targetIdx];
+    
+    // Determine exact insertion index
+    let dropPosition = targetIdx;
+    if (e.currentTarget.classList.contains('builder-element')) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const midpoint = rect.top + rect.height / 2;
+        dropPosition = e.clientY < midpoint ? targetIdx : targetIdx + 1;
+    }
+
+    if (draggedIdx !== null) {
+        // ========== REORDERING ==========
+        if (draggedIdx === targetIdx) return;
+        const movedEl = elements.splice(draggedIdx, 1)[0];
+        // Adjust for the shifted array index
+        const finalIdx = (draggedIdx < dropPosition) ? dropPosition - 1 : dropPosition;
+        elements.splice(finalIdx, 0, movedEl);
+        selectedIndices = [finalIdx];
+        showToast('Reordered', 'swap_horiz');
+    } else if (sidebarDraggedType) {
+        // ========== NEW ELEMENT FROM SIDEBAR ==========
+        const templates = getElementTemplates();
+        const html = templates[sidebarDraggedType] || `<div>New ${sidebarDraggedType}</div>`;
+        const newEl = { 
+            type: sidebarDraggedType.replace('_template', '').toUpperCase(), 
+            html: html 
+        };
+        elements.splice(dropPosition, 0, newEl);
+        selectedIndices = [dropPosition];
+        showToast(`Inserted ${newEl.type}`, 'add_to_photos');
+    }
+
     renderElements();
     draggedIdx = null;
-    showToast('Reordered', 'swap_vert');
+    sidebarDraggedType = null;
     syncPulse();
 }
 
@@ -1165,18 +1517,19 @@ function deleteEl(idx) {
     syncPulse();
 }
 
-// ========== RESIZING ==========
-let isResizing = false;
-let resizeIdx = null;
 let initialY = 0;
+let initialX = 0;
 let initialHeight = 0;
+let initialWidth = 0;
 
 function startResize(e, idx) {
     isResizing = true;
     resizeIdx = idx;
     initialY = e.clientY;
-    const el = document.querySelector(`.builder-element[data-idx="${idx}"] .element-content`);
+    initialX = e.clientX;
+    const el = document.querySelector(`.builder-element[data-idx="${idx}"]`);
     initialHeight = el.offsetHeight;
+    initialWidth = el.offsetWidth;
     document.addEventListener('mousemove', handleResize);
     document.addEventListener('mouseup', stopResize);
     document.body.style.cursor = 'nwse-resize';
@@ -1184,19 +1537,24 @@ function startResize(e, idx) {
 
 function handleResize(e) {
     if (!isResizing) return;
-    const diff = e.clientY - initialY;
-    // Snap to 32px grid
-    const newHeight = Math.max(32, Math.round((initialHeight + diff) / 32) * 32);
-    const el = document.querySelector(`.builder-element[data-idx="${resizeIdx}"] .element-content`);
+    const diffY = e.clientY - initialY;
+    const diffX = e.clientX - initialX;
+    
+    const newHeight = Math.max(32, initialHeight + diffY);
+    const newWidth = Math.max(32, initialWidth + diffX);
+    
+    const el = document.querySelector(`.builder-element[data-idx="${resizeIdx}"]`);
     el.style.height = newHeight + 'px';
     el.style.minHeight = newHeight + 'px';
+    el.style.width = newWidth + 'px';
+    el.style.maxWidth = '100%';
 }
 
 function stopResize() {
     if (isResizing) {
         saveHistory();
-        const elContainer = document.querySelector(`.builder-element[data-idx="${resizeIdx}"] .element-content`);
-        elements[resizeIdx].style = (elements[resizeIdx].style || '') + `;min-height:${elContainer.style.minHeight};height:${elContainer.style.height};`;
+        const elContainer = document.querySelector(`.builder-element[data-idx="${resizeIdx}"]`);
+        elements[resizeIdx].style = (elements[resizeIdx].style || '') + `;min-height:${elContainer.style.minHeight};height:${elContainer.style.height};width:${elContainer.style.width};max-width:100%;`;
         isResizing = false;
         document.removeEventListener('mousemove', handleResize);
         document.removeEventListener('mouseup', stopResize);
@@ -1306,11 +1664,26 @@ document.querySelectorAll('.comp-header').forEach(header => {
 // Initialize Library
 renderSavedComponents();
 
-// ========== SIDEBAR: COMPONENT ITEMS CLICK ==========
+// ========== SIDEBAR: COMPONENT ITEMS CLICK & DRAG ==========
+let sidebarDraggedType = null;
+
 document.querySelectorAll('.comp-item').forEach(item => {
+    item.setAttribute('draggable', 'true');
+    
     item.addEventListener('click', () => {
         const type = item.dataset.type;
-        addToCanvas(type);
+        if (type) addToCanvas(type);
+    });
+
+    item.addEventListener('dragstart', (e) => {
+        sidebarDraggedType = item.dataset.type;
+        draggedIdx = null; // Important: Clear any existing drag state
+        e.dataTransfer.setData('text/plain', sidebarDraggedType);
+        item.classList.add('opacity-50');
+    });
+
+    item.addEventListener('dragend', () => {
+        item.classList.remove('opacity-50');
     });
 });
 
@@ -1393,11 +1766,23 @@ document.querySelectorAll('.device-btn').forEach(btn => {
 document.querySelectorAll('.inspector-tab').forEach(tab => {
     tab.addEventListener('click', () => {
         document.querySelectorAll('.inspector-tab').forEach(t => {
-            t.classList.remove('text-emerald-400', 'border-b-2', 'border-emerald-500');
-            t.classList.add('text-slate-600');
+            if (t.dataset.tab === 'ux') {
+                t.classList.remove('text-blue-400', 'border-b-2', 'border-blue-400');
+                t.classList.add('text-blue-400/50', 'border-transparent');
+            } else {
+                t.classList.remove('text-emerald-400', 'border-b-2', 'border-emerald-500');
+                t.classList.add('text-slate-600', 'border-transparent');
+            }
         });
-        tab.classList.add('text-emerald-400', 'border-b-2', 'border-emerald-500');
-        tab.classList.remove('text-slate-600');
+        
+        if (tab.dataset.tab === 'ux') {
+            tab.classList.add('text-blue-400', 'border-b-2', 'border-blue-400');
+            tab.classList.remove('text-blue-400/50', 'border-transparent');
+        } else {
+            tab.classList.add('text-emerald-400', 'border-b-2', 'border-emerald-500');
+            tab.classList.remove('text-slate-600', 'border-transparent');
+        }
+        
         document.querySelectorAll('.inspector-content').forEach(c => c.classList.add('hidden'));
         document.getElementById('tab-' + tab.dataset.tab).classList.remove('hidden');
     });
@@ -1470,13 +1855,39 @@ document.getElementById('font-weight-select').addEventListener('change', (e) => 
 // ========== DESIGN CONTROLS ==========
 const updateElementStyle = (prop, val, isUnit = false) => {
     if (selectedIndices.length > 0) {
-        saveHistory();
+        const valueStr = isUnit ? val + 'px' : val;
+        let requiresSave = false;
+
         selectedIndices.forEach(idx => {
-            const el = document.querySelector(`.builder-element[data-idx="${idx}"] .element-content`);
-            if (el) el.style[prop] = isUnit ? val + 'px' : val;
-            elements[idx].style = (elements[idx].style || '') + `;${prop.replace(/[A-Z]/g, m => '-' + m.toLowerCase())}:${isUnit ? val + 'px' : val};`;
+            const elContainer = document.querySelector(`.builder-element[data-idx="${idx}"]`);
+            if (elContainer) {
+                let targetNode = elContainer.querySelector('.element-content');
+                if (activeDeepNode && elContainer.contains(activeDeepNode)) {
+                    targetNode = activeDeepNode;
+                }
+
+                if (targetNode.style[prop] !== valueStr) {
+                    if (!requiresSave) { saveHistory(); requiresSave = true; }
+                    targetNode.style[prop] = valueStr;
+                    
+                    // Temp clear UI states for clean snapshot
+                    if (activeDeepNode) {
+                        activeDeepNode.style.outline = '';
+                        activeDeepNode.classList.remove('deep-selected');
+                    }
+                    
+                    elements[idx].html = elContainer.querySelector('.element-content').innerHTML;
+                    
+                    // Restore UI states
+                    if (activeDeepNode) {
+                        activeDeepNode.classList.add('deep-selected');
+                        activeDeepNode.style.outline = '2px dashed #10b981';
+                        activeDeepNode.style.outlineOffset = '2px';
+                    }
+                }
+            }
         });
-        syncPulse();
+        if (requiresSave) syncPulse();
     }
 };
 
@@ -1508,11 +1919,25 @@ document.querySelectorAll('.layout-btn').forEach(btn => {
         if (selectedIndices.length > 0) {
             saveHistory();
             selectedIndices.forEach(idx => {
-                const el = document.querySelector(`.builder-element[data-idx="${idx}"] .element-content`);
-                if (el) {
-                    el.style.display = 'flex';
-                    el.style[prop] = val;
-                    elements[idx].style = (elements[idx].style || '') + `;display:flex;${prop.replace(/[A-Z]/g, m => '-' + m.toLowerCase())}:${val};`;
+                const elContainer = document.querySelector(`.builder-element[data-idx="${idx}"]`);
+                if (elContainer) {
+                    let targetNode = elContainer.querySelector('.element-content');
+                    if (activeDeepNode && elContainer.contains(activeDeepNode)) {
+                         targetNode = activeDeepNode;
+                    }
+                    targetNode.style.display = 'flex';
+                    targetNode.style[prop] = val;
+                    
+                    if (activeDeepNode) {
+                        activeDeepNode.style.outline = '';
+                        activeDeepNode.classList.remove('deep-selected');
+                    }
+                    elements[idx].html = elContainer.querySelector('.element-content').innerHTML;
+                    if (activeDeepNode) {
+                        activeDeepNode.classList.add('deep-selected');
+                        activeDeepNode.style.outline = '2px dashed #10b981';
+                        activeDeepNode.style.outlineOffset = '2px';
+                    }
                 }
             });
             syncPulse();
@@ -1545,25 +1970,25 @@ function populateContentTab() {
     document.getElementById('placeholder-field').style.display = 'none';
 
     // Main Text
-    const textTarget = content.querySelector('h1, h2, h3, h4, p, span, blockquote, button');
+    const textTarget = (activeDeepNode && !['IMG', 'INPUT', 'TEXTAREA', 'HR'].includes(activeDeepNode.tagName)) ? activeDeepNode : content.querySelector('h1, h2, h3, h4, p, span, blockquote, button');
     document.getElementById('content-main').value = textTarget ? textTarget.textContent.trim() : '';
 
     // Image
-    const imgTarget = content.querySelector('img') || (content.style.backgroundImage ? content : null);
+    const imgTarget = (activeDeepNode && activeDeepNode.tagName === 'IMG') ? activeDeepNode : (content.querySelector('img') || (content.style.backgroundImage ? content : null));
     if (imgTarget) {
         document.getElementById('img-field').style.display = 'block';
         document.getElementById('content-img-url').value = imgTarget.src || '';
     }
 
     // Link
-    const linkTarget = content.querySelector('a') || (content.tagName === 'A' ? content : null);
+    const linkTarget = (activeDeepNode && activeDeepNode.tagName === 'A') ? activeDeepNode : (content.querySelector('a') || (content.tagName === 'A' ? content : null));
     if (linkTarget) {
         document.getElementById('link-field').style.display = 'block';
         document.getElementById('content-link-url').value = linkTarget.href || '#';
     }
 
     // Form
-    const inputTarget = content.querySelector('input, textarea');
+    const inputTarget = (activeDeepNode && ['INPUT', 'TEXTAREA'].includes(activeDeepNode.tagName)) ? activeDeepNode : content.querySelector('input, textarea');
     if (inputTarget) {
         document.getElementById('placeholder-field').style.display = 'block';
         document.getElementById('content-placeholder').value = inputTarget.placeholder || '';
@@ -1578,22 +2003,34 @@ document.getElementById('apply-content-btn').addEventListener('click', () => {
     const content = elContainer.querySelector('.element-content');
 
     const mainText = document.getElementById('content-main').value;
-    const textTarget = content.querySelector('h1, h2, h3, h4, p, span, blockquote, button');
+    const textTarget = (activeDeepNode && !['IMG', 'INPUT', 'TEXTAREA', 'HR'].includes(activeDeepNode.tagName)) ? activeDeepNode : content.querySelector('h1, h2, h3, h4, p, span, blockquote, button');
     if (textTarget) textTarget.textContent = mainText;
 
     const imgUrl = document.getElementById('content-img-url').value;
-    const imgTarget = content.querySelector('img');
+    const imgTarget = (activeDeepNode && activeDeepNode.tagName === 'IMG') ? activeDeepNode : content.querySelector('img');
     if (imgTarget) imgTarget.src = imgUrl;
 
     const linkUrl = document.getElementById('content-link-url').value;
-    const linkTarget = content.querySelector('a');
+    const linkTarget = (activeDeepNode && activeDeepNode.tagName === 'A') ? activeDeepNode : content.querySelector('a');
     if (linkTarget) linkTarget.href = linkUrl;
 
     const placeholder = document.getElementById('content-placeholder').value;
-    const inputTarget = content.querySelector('input, textarea');
+    const inputTarget = (activeDeepNode && ['INPUT', 'TEXTAREA'].includes(activeDeepNode.tagName)) ? activeDeepNode : content.querySelector('input, textarea');
     if (inputTarget) inputTarget.placeholder = placeholder;
 
+    if (activeDeepNode) {
+        activeDeepNode.style.outline = '';
+        activeDeepNode.classList.remove('deep-selected');
+    }
+    
     elements[idx].html = content.innerHTML;
+
+    if (activeDeepNode) {
+        activeDeepNode.classList.add('deep-selected');
+        activeDeepNode.style.outline = '2px dashed #10b981';
+        activeDeepNode.style.outlineOffset = '2px';
+    }
+
     showToast('Content sync complete', 'auto_fix_high');
     syncPulse();
 });
@@ -1704,6 +2141,7 @@ function updateInspector() {
     if (selectedIndices.length === 1) {
         const idx = selectedIndices[0];
         const el = elements[idx];
+        if (!el) return;
         const target = document.getElementById('inspector-target');
         if (target) target.textContent = (el.type || 'module').toUpperCase();
 
@@ -2103,16 +2541,166 @@ document.getElementById('view-live-btn').addEventListener('click', () => {
 });
 
 // ========== AI PROMPT TEMPLATES ==========
+const staticTemplates = {
+    hero: `<section class="h-[600px] flex items-center justify-center bg-slate-900 border border-slate-800 text-center px-4 relative overflow-hidden group">
+  <div class="max-w-4xl mx-auto z-10 space-y-8">
+    <h1 class="text-5xl @md:text-7xl font-extrabold text-white tracking-tight">Build at the Speed of Thought</h1>
+    <p class="text-xl text-slate-400 max-w-2xl mx-auto">Design, build, and deploy stunning websites with unparalleled speed using AI-driven orchestration.</p>
+    <div class="flex gap-4 justify-center mt-8">
+      <button class="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-full transition-all">Get Started</button>
+      <button class="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-full transition-all">Read Docs</button>
+    </div>
+  </div>
+</section>`,
+    features: `<section class="py-24 bg-white border border-slate-200 text-slate-900 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl font-bold">Unmatched Capabilities</h2>
+      <p class="text-slate-500 mt-4 max-w-2xl mx-auto">Everything you need to build next-generation web apps.</p>
+    </div>
+    <div class="grid grid-cols-1 @md:grid-cols-3 gap-8">
+      <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
+          <span class="material-symbols-outlined">rocket_launch</span>
+        </div>
+        <h3 class="text-xl font-bold mb-3">Lightning Fast</h3>
+        <p class="text-slate-600">Deploy your applications globally to the edge in under 10 seconds.</p>
+      </div>
+      <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-6">
+          <span class="material-symbols-outlined">auto_awesome</span>
+        </div>
+        <h3 class="text-xl font-bold mb-3">AI Powered</h3>
+        <p class="text-slate-600">Orchestrate powerful workflows using an intelligent array of systems.</p>
+      </div>
+      <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-6">
+          <span class="material-symbols-outlined">code</span>
+        </div>
+        <h3 class="text-xl font-bold mb-3">Extensible</h3>
+        <p class="text-slate-600">Built on open standards ensuring limitless deep customization.</p>
+      </div>
+    </div>
+  </div>
+</section>`,
+    pricing: `<section class="py-24 bg-slate-50 border border-slate-200 text-slate-900 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl font-bold">Simple, Transparent Pricing</h2>
+    </div>
+    <div class="grid grid-cols-1 @md:grid-cols-3 gap-8">
+      <div class="p-8 rounded-2xl bg-white border border-slate-200 shadow-sm text-center">
+        <h3 class="text-xl font-bold mb-2">Starter</h3>
+        <p class="text-4xl font-extrabold mb-6">$0<span class="text-base font-normal text-slate-500">/mo</span></p>
+        <button class="w-full py-3 bg-slate-100 hover:bg-slate-200 font-bold rounded-lg mb-6">Get Started</button>
+      </div>
+      <div class="p-8 rounded-2xl bg-slate-900 text-white border border-slate-800 shadow-xl text-center relative z-10">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full text-white">Most Popular</div>
+        <h3 class="text-xl font-bold mb-2">Pro</h3>
+        <p class="text-4xl font-extrabold mb-6">$29<span class="text-base font-normal text-slate-400">/mo</span></p>
+        <button class="w-full py-3 bg-blue-500 hover:bg-blue-600 font-bold rounded-lg mb-6 shadow-lg shadow-blue-500/20 text-white">Upgrade to Pro</button>
+      </div>
+      <div class="p-8 rounded-2xl bg-white border border-slate-200 shadow-sm text-center">
+        <h3 class="text-xl font-bold mb-2">Enterprise</h3>
+        <p class="text-4xl font-extrabold mb-6">Custom</p>
+        <button class="w-full py-3 bg-slate-100 hover:bg-slate-200 font-bold rounded-lg mb-6">Contact Sales</button>
+      </div>
+    </div>
+  </div>
+</section>`,
+    custom: `<footer class="bg-slate-950 text-slate-400 py-12 px-6 border-t border-slate-900">
+  <div class="max-w-6xl mx-auto flex flex-col @md:flex-row justify-between items-center gap-6">
+    <div class="text-2xl font-black text-white tracking-tighter">EzD&D.</div>
+    <div class="flex gap-6 text-sm">
+      <a href="#" class="hover:text-white transition-colors cursor-pointer">Privacy</a>
+      <a href="#" class="hover:text-white transition-colors cursor-pointer">Terms</a>
+      <a href="#" class="hover:text-white transition-colors cursor-pointer">Contact</a>
+    </div>
+    <div class="text-xs">© 2026 Ez D&D Inc. All rights reserved.</div>
+  </div>
+</footer>`
+};
+
 document.querySelectorAll('.template-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const type = btn.dataset.type;
-        const prompt = btn.dataset.prompt;
         
-        document.getElementById('ai-type').value = type;
-        document.getElementById('ai-prompt').value = prompt;
-        
-        showToast(`Template ready: ${btn.textContent.toUpperCase()}`, 'auto_fix');
+        if (type === 'hero') {
+            enterIsolationMode();
+            return;
+        }
+
+        const html = staticTemplates[type];
+        if (html) {
+            saveHistory();
+            elements.push({ type: btn.textContent.trim(), html: html });
+            selectedIndices = [elements.length - 1];
+            renderElements();
+            showToast(`${btn.textContent.trim()} Component Injected!`, 'auto_awesome');
+            syncPulse();
+        } else {
+            // Fallback for types not mapped statically
+            document.getElementById('ai-type').value = type;
+            document.getElementById('ai-prompt').value = btn.dataset.prompt;
+            showToast(`Template ready: ${btn.textContent.toUpperCase()}`, 'auto_fix');
+        }
     });
+});
+
+// ========== ADVANCED AI FEATURES ==========
+
+// 1. UX Analysis
+document.getElementById('ai-analyze-ux-btn')?.addEventListener('click', async () => {
+    if (selectedIndices.length !== 1) return showToast('Select one component to analyze', 'warning');
+    const idx = selectedIndices[0];
+    const el = elements[idx];
+    const btn = document.getElementById('ai-analyze-ux-btn');
+    const box = document.getElementById('ux-suggestions-box');
+    const genText = btn.querySelector('.analyze-ux-text');
+    
+    try {
+        btn.disabled = true; genText.textContent = 'Analyzing...';
+        box.classList.remove('hidden'); box.innerHTML = '<span class="animate-pulse">Consulting UX Oracle...</span>';
+        
+        const res = await fetch('http://localhost:5000/api/ai/analyze-ux', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ html: el.html })
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        
+        box.innerHTML = data.suggestions ? data.suggestions.replace(/\n/g, '<br/>') : 'LGTM.';
+        showToast('UX Analysis Complete', 'psychology');
+    } catch (e) {
+        box.innerHTML = 'Analysis failed. Oracle is busy.';
+    } finally {
+        btn.disabled = false; genText.textContent = 'Analyze Component';
+    }
+});
+
+// 2. Auto-Align Fix
+document.getElementById('ai-align-btn')?.addEventListener('click', () => {
+    document.getElementById('ai-refine-prompt').value = "Fix padding, margin, flexbox alignment, and gap spacing to ensure this component follows perfect, modern web design proportions using appropriate Tailwind utility classes. Make it responsive.";
+    document.getElementById('ai-refine-btn').click();
+    showToast('Align instruction queued to oracle...', 'auto_awesome');
+});
+
+// 3. Smart Wire
+document.getElementById('ai-wire-btn')?.addEventListener('click', () => {
+    document.getElementById('ai-refine-prompt').value = "Auto-link components. For buttons or nav items without links, add logical generic hrefs (e.g. href='#pricing' or href='/contact') based on text context. Add transition effects to links.";
+    document.getElementById('ai-refine-btn').click();
+    showToast('Wiring instruction queued to oracle...', 'link');
+});
+
+// 4. Enforce Consistency
+document.getElementById('ai-consistency-btn')?.addEventListener('click', () => {
+    const primaryColorHex = document.getElementById('color-primary-hex').textContent;
+    const bgColorHex = document.getElementById('color-bg-hex').textContent;
+    const fontFamily = document.getElementById('font-family-select').value;
+    
+    document.getElementById('ai-refine-prompt').value = `Enforce global design consistency: Convert all text to font family '${fontFamily}'. Make primary call-to-actions, buttons, or highlights use hex color ${primaryColorHex}. Make background containers use ${bgColorHex}. Use Tailwind arbitrary values if needed.`;
+    document.getElementById('ai-refine-btn').click();
+    showToast('Consistency instruction queued to oracle...', 'format_paint');
 });
 
 // ========== AI REFINEMENT LOGIC ==========
@@ -2220,7 +2808,7 @@ updateInspector = function() {
     originalUpdateInspector();
     
     const refineSection = document.getElementById('ai-refine-section');
-    if (selectedIndices.length === 1 && elements[selectedIndices[0]].type !== 'ai-generated') {
+    if (selectedIndices.length === 1 && elements[selectedIndices[0]] && elements[selectedIndices[0]].type !== 'ai-generated') {
         // Technically all can be refined if they have HTML
         refineSection.classList.remove('hidden');
     } else if (selectedIndices.length === 1) {
